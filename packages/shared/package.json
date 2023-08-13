@@ -1,7 +1,23 @@
 {
   "name": "@virt/shared",
   "description": "Shared utils, types etc",
+  "files": [
+    "dist"
+  ],
+  "types": "./dist/index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./*": "./*"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "app:dev": "pnpm build:watch",
+    "build": "vite build",
+    "build:watch": "vite build --watch --config ./vite.config.ts"
   }
 }

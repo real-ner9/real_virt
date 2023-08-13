@@ -11,5 +11,7 @@ module.exports = {
   trailingComma: 'all',
   printWidth: 80,
   endOfLine: 'lf',
+  tabWidth: 2,
   singleAttributePerLine: true,
+  arrowParens: 'always',
 };
