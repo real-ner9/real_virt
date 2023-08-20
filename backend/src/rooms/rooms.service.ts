@@ -14,11 +14,13 @@ import {
   mergeMap,
   Observable,
   of,
+  Subscriber,
   throwError,
 } from 'rxjs';
 
 @Injectable()
 export class RoomsService {
+  private waitingQueue: { [key: string]: Subscriber<string> } = {};
   constructor(
     @InjectModel(Room.name) private roomModel: Model<RoomDocument>,
     @InjectModel(Message.name) private messageModel: Model<MessageDocument>,
@@ -105,5 +107,67 @@ export class RoomsService {
         );
       }),
     );
+  }
+  searchForChat(userId: string): Observable<string | null> {
+    return new Observable<string | null>((observer) => {
+      // Проверяем, есть ли уже пользователь в очереди
+      if (this.waitingQueue[userId]) {
+        observer.next(null);
+        observer.complete();
+        return;
+      }
+
+      // Добавляем пользователя в очередь
+      this.waitingQueue[userId] = observer;
+
+      console.log(this.waitingQueue.length, observer);
+
+      // Проверяем очередь каждые 5 секунд
+      const intervalId = setInterval(() => {
+        // Если найден партнер для чата
+        if (Object.keys(this.waitingQueue).length > 1) {
+          const partnerId = Object.keys(this.waitingQueue).find(
+            (id) => id !== userId,
+          );
+
+          if (partnerId) {
+            // Создаем комнату для них
+            const roomNumber = this.generateUniqueRoomNumber();
+            const room = new this.roomModel({
+              users: [userId, partnerId],
+              roomNumber,
+            });
+            room.save().then(() => {
+              // Уведомляем обоих пользователей о комнате
+              this.waitingQueue[userId].next(roomNumber);
+              this.waitingQueue[partnerId].next(roomNumber);
+              this.waitingQueue[userId].complete();
+              this.waitingQueue[partnerId].complete();
+
+              delete this.waitingQueue[userId];
+              delete this.waitingQueue[partnerId];
+            });
+
+            clearInterval(intervalId);
+          }
+        }
+      }, 1000);
+
+      // Если пользователь ждал партнера слишком долго
+      setTimeout(() => {
+        clearInterval(intervalId);
+        this.waitingQueue[userId].next(null); // завершаем поток
+        this.waitingQueue[userId].complete();
+        delete this.waitingQueue[userId];
+      }, 120000); // Например, 2 минуты
+    });
+  }
+
+  stopSearch(userId: string): void {
+    if (this.waitingQueue[userId]) {
+      this.waitingQueue[userId].next(null); // завершаем поток
+      this.waitingQueue[userId].complete();
+      delete this.waitingQueue[userId];
+    }
   }
 }

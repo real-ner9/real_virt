@@ -32,12 +32,32 @@ const ApiService = {
 
   createRoom(): Observable<RoomData> {
     return from(
-      axios
-        .post<RoomData>(`${BASE_URL}/rooms`)
-        .then(response => response.data),
+      axios.post<RoomData>(`${BASE_URL}/rooms`).then(response => response.data),
     ).pipe(
       catchError(error => {
         console.error('Error creating room:', error);
+        return throwError(error);
+      }),
+    );
+  },
+
+  searchForChat(userId: string): Observable<string | null> {
+    return from(
+      axios
+        .get(`${BASE_URL}/rooms/search/${userId}`)
+        .then(response => response.data),
+    ).pipe(
+      catchError(error => {
+        console.error('Error searching for chat:', error);
+        return throwError(error);
+      }),
+    );
+  },
+
+  stopSearch(userId: string): Observable<any> {
+    return from(axios.post(`${BASE_URL}/rooms/stopSearch`, {userId})).pipe(
+      catchError(error => {
+        console.error('Error stopping search:', error);
         return throwError(error);
       }),
     );
