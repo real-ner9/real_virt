@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { Room } from './schemas/room.schema';
-import { catchError, Observable } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 
 @Controller('rooms')
 export class RoomsController {
@@ -47,5 +47,16 @@ export class RoomsController {
         );
       }),
     );
+  }
+
+  @Get('search/:userId')
+  searchForChat(@Param('userId') userId: string) {
+    return this.roomsService.searchForChat(userId);
+  }
+
+  @Post('stopSearch')
+  stopSearch(@Body('userId') userId: string): Observable<void> {
+    this.roomsService.stopSearch(userId);
+    return of(null);
   }
 }
