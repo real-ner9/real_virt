@@ -8,6 +8,7 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { RoomsService } from './rooms.service';
 
 @WebSocketGateway()
 export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -15,14 +16,19 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   users: { [key: string]: string } = {};
 
+  constructor(private readonly service: RoomsService) {}
+
   handleConnection(socket: Socket) {
-    // TODO разобраться с типом на строчке ниже
     const userId = socket.handshake.query.userId as string;
     this.users[socket.id] = userId;
   }
 
   handleDisconnect(socket: Socket) {
-    delete this.users[socket.id];
+    const userId = this.users[socket.id];
+    if (userId) {
+      // TODO: Optionally handle any logic when a user disconnects.
+      delete this.users[socket.id];
+    }
   }
 
   getOtherUserIdInRoom(
@@ -32,7 +38,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userIdsInRoom = Object.values(this.users).filter(
       (userId) => userId !== currentUserId,
     );
-    return userIdsInRoom[0]; // Возвращает первого другого пользователя в комнате
+    return userIdsInRoom[0];
   }
 
   getSocketIdByUserId(userId: string): string | undefined {
@@ -43,35 +49,56 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleJoinRoom(@MessageBody() data: any, @ConnectedSocket() socket: Socket) {
     const { roomNumber, userId } = data;
 
-    const currentUsersInRoom = Object.values(this.users).filter(
-      (id) => id !== userId,
-    );
-    if (currentUsersInRoom.length >= 2) {
-      this.server.to(userId).emit('roomIsFool', { userId });
-      return;
-    }
+    // TODO надо будет тут напсисать правильную проверку
+    // const currentUsersInRoom = Object.values(this.users).filter(
+    //   (id) => id !== userId,
+    // );
+    //
+    // if (currentUsersInRoom.length > 2) {
+    //   this.server.to(userId).emit('roomIsFull', { userId });
+    //   return;
+    // }
 
-    // Оповещаем другого пользователя о присоединении
     const otherUserId = this.getOtherUserIdInRoom(roomNumber, userId);
     const otherSocketId = this.getSocketIdByUserId(otherUserId);
     if (otherSocketId) {
       this.server.to(otherSocketId).emit('userJoined', { userId });
     }
 
-    // Присоединяем сокет к комнате
     socket.join(roomNumber);
   }
 
-  // @SubscribeMessage('message')
-  // handleMessage(@MessageBody() data: any, @ConnectedSocket() socket: Socket) {
-  //   // Обработка и отправка сообщения
-  // }
+  @SubscribeMessage('message')
+  async handleMessage(
+    @MessageBody() data: any,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const { roomNumber, content, userId } = data;
+
+    this.service.addMessageToRoom(roomNumber, content, userId).subscribe(
+      () => {
+        this.server
+          .in(roomNumber)
+          .emit('newMessage', { user: userId, content });
+      },
+      (error) => {
+        console.error('Error handling message:', error);
+        // Optionally send an error message back to the client.
+        socket.emit('errorMessage', {
+          message: 'Unable to process your message.',
+        });
+      },
+    );
+  }
 
   @SubscribeMessage('leaveRoom')
   handleLeaveRoom(@MessageBody() data: any, @ConnectedSocket() socket: Socket) {
+    const { roomNumber } = data;
+    socket.leave(roomNumber);
+
     const userId = this.users[socket.id];
     if (userId) {
-      // Отправить уведомление о выходе из комнаты другому пользователю
+      // TODO: Optionally notify other users in the room about this user leaving.
       delete this.users[socket.id];
     }
   }

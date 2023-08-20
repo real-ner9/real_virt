@@ -5,7 +5,7 @@ export type MessageDocument = Message & Document;
 
 @Schema()
 export class Message {
-  @Prop({ type: SchemaTypes.ObjectId, ref: 'User' })
+  @Prop()
   user: string; // Привязка к пользователю (по ObjectId)
 
   @Prop()

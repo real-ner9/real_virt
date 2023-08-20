@@ -39,8 +39,8 @@ export class RoomsService {
 
   addMessageToRoom(
     roomNumber: string,
-    userId: string,
     content: string,
+    userId: string,
   ): Observable<Room> {
     return from(this.roomModel.findOne({ roomNumber })).pipe(
       mergeMap((room) => {
