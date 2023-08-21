@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, Text, TextInput, Button} from 'react-native';
 import {EMPTY, Subject, switchMap} from 'rxjs';
 import {catchError, takeUntil} from 'rxjs/operators';
@@ -14,23 +14,21 @@ interface LandingPageProps {
 const LandingPage: React.FC<LandingPageProps> = ({navigation}) => {
   const [roomNumber, setRoomNumber] = useState('');
   const [destroy$] = useState(new Subject());
-  const userId = useMemo(async () => {
-    let id = await AsyncStorage.getItem('userId');
-    if (!id) {
-      id = generateUniqueId();
-      await AsyncStorage.setItem('userId', id);
-    }
-    return id;
-  }, []);
   // Новый стейт для отслеживания состояния поиска
   const [isSearching, setIsSearching] = useState(false);
-
+  const [userId, setUserId] = useState<string | null>(null);
   useEffect(() => {
-    return () => {
-      destroy$.next(true);
-      destroy$.complete();
+    const fetchUserId = async () => {
+      let id = await AsyncStorage.getItem('userId');
+      if (!id) {
+        id = generateUniqueId();
+        await AsyncStorage.setItem('userId', id);
+      }
+      setUserId(id);
     };
-  }, [destroy$]);
+
+    fetchUserId();
+  }, []);
 
   const connectToRoom = () => {
     ApiService.connectToRoom(roomNumber)
@@ -74,8 +72,11 @@ const LandingPage: React.FC<LandingPageProps> = ({navigation}) => {
       );
   };
 
-  const handleStopSearch = async () => {
-    ApiService.stopSearch(await userId)
+  const handleStopSearch = () => {
+    if (!userId) {
+      return;
+    }
+    ApiService.stopSearch(userId)
       .pipe(takeUntil(destroy$))
       .subscribe(
         () => {
@@ -90,8 +91,29 @@ const LandingPage: React.FC<LandingPageProps> = ({navigation}) => {
   };
 
   const handleSearchForChat = async () => {
+    if (!userId) {
+      return;
+    }
+
+    // Загрузка параметров из AsyncStorage
+    let loadedUserParameters = null;
+    let loadedSearchParameters = null;
+    try {
+      const rawDataUser = await AsyncStorage.getItem('userParameters');
+      loadedUserParameters = rawDataUser ? JSON.parse(rawDataUser) : null;
+
+      const rawDataSearch = await AsyncStorage.getItem('searchParameters');
+      loadedSearchParameters = rawDataSearch ? JSON.parse(rawDataSearch) : null;
+    } catch (error) {
+      console.error('Error loading parameters from AsyncStorage:', error);
+    }
+
     setIsSearching(true);
-    ApiService.searchForChat(await userId)
+    ApiService.searchForChat(
+      userId,
+      loadedUserParameters,
+      loadedSearchParameters,
+    )
       .pipe(
         takeUntil(destroy$),
         catchError(error => {
@@ -133,6 +155,14 @@ const LandingPage: React.FC<LandingPageProps> = ({navigation}) => {
       />
       <Button title="Connect" onPress={connectToRoom} />
       <Button title="Create and Connect" onPress={handleCreateRoom} />
+      <Button
+        title="Edit Profile"
+        onPress={() => navigation.navigate('UserProfile')}
+      />
+      <Button
+        title="Edit Search Parameters"
+        onPress={() => navigation.navigate('SearchParameters')}
+      />
       {isSearching ? (
         <Button title="Stop Searching" onPress={handleStopSearch} />
       ) : (

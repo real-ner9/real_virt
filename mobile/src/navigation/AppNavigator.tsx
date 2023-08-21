@@ -3,6 +3,8 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import LandingPage from '../screens/LandingPage';
 import RoomPage from '../screens/RoomPage';
+import UserProfileScreen from '../screens/UserProfileScreen';
+import SearchParameters from '../screens/SearchParameters';
 
 const Stack = createStackNavigator();
 
@@ -11,6 +13,8 @@ const AppNavigator: React.FC = () => {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Landing">
         <Stack.Screen name="Landing" component={LandingPage} />
+        <Stack.Screen name="UserProfile" component={UserProfileScreen} />
+        <Stack.Screen name="SearchParameters" component={SearchParameters} />
         <Stack.Screen name="RoomPage" component={RoomPage} />
       </Stack.Navigator>
     </NavigationContainer>
