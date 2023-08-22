@@ -41,10 +41,18 @@ const ApiService = {
     );
   },
 
-  searchForChat(userId: string): Observable<string | null> {
+  searchForChat(
+    userId: string,
+    userParameters: any,
+    searchParameters: any,
+  ): Observable<string | null> {
     return from(
       axios
-        .get(`${BASE_URL}/rooms/search/${userId}`)
+        .post(`${BASE_URL}/rooms/search`, {
+          userId,
+          userParameters,
+          searchParameters,
+        })
         .then(response => response.data),
     ).pipe(
       catchError(error => {

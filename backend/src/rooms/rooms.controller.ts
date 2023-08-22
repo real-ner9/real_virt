@@ -11,6 +11,7 @@ import {
 import { RoomsService } from './rooms.service';
 import { Room } from './schemas/room.schema';
 import { catchError, Observable, of } from 'rxjs';
+import { SearchDto } from './models/search-dto';
 
 @Controller('rooms')
 export class RoomsController {
@@ -49,9 +50,13 @@ export class RoomsController {
     );
   }
 
-  @Get('search/:userId')
-  searchForChat(@Param('userId') userId: string) {
-    return this.roomsService.searchForChat(userId);
+  @Post('search')
+  searchForChat(@Body() dto: SearchDto) {
+    return this.roomsService.searchForChat(
+      dto.userId,
+      dto.userParameters,
+      dto.searchParameters,
+    );
   }
 
   @Post('stopSearch')
