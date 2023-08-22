@@ -70,6 +70,30 @@ const ApiService = {
       }),
     );
   },
+
+  uploadFile(fileUri: string, type: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', {
+      uri: fileUri,
+      type,
+      name: fileUri.split('/').pop(),
+    });
+
+    return from(
+      axios
+        .post(`${BASE_URL}/rooms/upload`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+        .then(response => response.data),
+    ).pipe(
+      catchError(error => {
+        console.error('Error uploading file:', error);
+        return throwError(error);
+      }),
+    );
+  },
 };
 
 export default ApiService;

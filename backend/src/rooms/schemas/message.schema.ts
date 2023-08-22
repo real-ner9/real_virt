@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, SchemaTypes } from 'mongoose';
+import { Document } from 'mongoose';
+import { Attachment } from '../models/attachment';
 
 export type MessageDocument = Message & Document;
 
@@ -13,6 +14,9 @@ export class Message {
 
   @Prop({ type: Date, default: Date.now })
   timestamp: Date; // Временная метка сообщения
+
+  @Prop()
+  attachments: Attachment[]; // вложения
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

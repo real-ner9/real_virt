@@ -9,6 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { RoomsService } from './rooms.service';
+import { Attachment } from './models/attachment';
 
 @WebSocketGateway()
 export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -70,25 +71,38 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('message')
   async handleMessage(
-    @MessageBody() data: any,
+    @MessageBody()
+    data: {
+      roomNumber: string;
+      content: string;
+      userId: string;
+      attachments: Attachment[];
+    },
     @ConnectedSocket() socket: Socket,
   ) {
-    const { roomNumber, content, userId } = data;
+    const { roomNumber, content, userId, attachments } = data;
 
-    this.service.addMessageToRoom(roomNumber, content, userId).subscribe(
-      () => {
-        this.server
-          .in(roomNumber)
-          .emit('newMessage', { user: userId, content });
-      },
-      (error) => {
-        console.error('Error handling message:', error);
-        // Optionally send an error message back to the client.
-        socket.emit('errorMessage', {
-          message: 'Unable to process your message.',
-        });
-      },
-    );
+    this.service
+      .addMessageToRoom({
+        roomNumber,
+        content,
+        userId,
+        attachments,
+      })
+      .subscribe(
+        () => {
+          this.server
+            .in(roomNumber)
+            .emit('newMessage', { user: userId, content, attachments });
+        },
+        (error) => {
+          console.error('Error handling message:', error);
+          // Optionally send an error message back to the client.
+          socket.emit('errorMessage', {
+            message: 'Unable to process your message.',
+          });
+        },
+      );
   }
 
   @SubscribeMessage('leaveRoom')

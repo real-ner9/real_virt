@@ -19,6 +19,7 @@ import {
 } from 'rxjs';
 import { UserParameters } from './models/user-parameters';
 import { SearchParameters } from './models/search-parameters';
+import { Attachment } from './models/attachment';
 
 @Injectable()
 export class RoomsService {
@@ -47,18 +48,28 @@ export class RoomsService {
     );
   }
 
-  addMessageToRoom(
-    roomNumber: string,
-    content: string,
-    userId: string,
-  ): Observable<Room> {
+  addMessageToRoom({
+    roomNumber,
+    userId,
+    content,
+    attachments,
+  }: {
+    roomNumber: string;
+    userId: string;
+    content: string;
+    attachments: Attachment[];
+  }): Observable<Room> {
     return from(this.roomModel.findOne({ roomNumber })).pipe(
       mergeMap((room) => {
         if (!room) {
           return of(null); // Комната не найдена
         }
 
-        const message = new this.messageModel({ user: userId, content });
+        const message = new this.messageModel({
+          user: userId,
+          content,
+          attachments,
+        });
         return from(message.save()).pipe(
           mergeMap(() => {
             room.messages.push(message);
@@ -157,7 +168,6 @@ export class RoomsService {
           });
 
           if (partnerId) {
-            console.log('it works?');
             // Создаем комнату для них
             const roomNumber = this.generateUniqueRoomNumber();
             const room = new this.roomModel({
@@ -165,10 +175,6 @@ export class RoomsService {
               roomNumber,
             });
             room.save().then(() => {
-              console.log(this.waitingQueue[userId]?.observer);
-              console.log(this.waitingQueue[partnerId]?.observer);
-              console.log(roomNumber);
-
               // Уведомляем обоих пользователей о комнате
               this.waitingQueue[userId]?.observer.next(roomNumber);
               this.waitingQueue[partnerId]?.observer.next(roomNumber);
@@ -181,7 +187,6 @@ export class RoomsService {
 
             clearInterval(intervalId);
           } else {
-            console.log('it doestn work');
             // Если по параметрам чела не нашлось, уведомляем, что нужно поменять параметры
             this.waitingQueue[userId].observer.next('NOT_FOUND');
             this.waitingQueue[userId].observer.complete();
@@ -216,8 +221,6 @@ export class RoomsService {
     userParameters: UserParameters,
     searchParameters: SearchParameters,
   ): boolean {
-    console.log('userParameters', userParameters);
-    console.log('searchParameters', searchParameters);
     // Проверка пола
     if (searchParameters.gender !== userParameters.gender) return false;
 
