@@ -1,22 +1,56 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, TextInput, Button} from 'react-native';
-import {EMPTY, Subject, switchMap} from 'rxjs';
-import {catchError, takeUntil} from 'rxjs/operators';
-import ApiService from '../services/ApiService';
+import {View, Text, TextInput} from 'react-native';
+import {Subject} from 'rxjs';
 import {NavigationProp} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {generateUniqueId} from '../utils/generateUniqueId';
+import CustomButton from '../components/CustomButton';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import SearchPartnerTab from '../components/SearchPartnerTab';
+import ConnectRoomTab from '../components/ConnectRoomTab';
 
 interface LandingPageProps {
   navigation: NavigationProp<any>;
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({navigation}) => {
-  const [roomNumber, setRoomNumber] = useState('');
+  const styles = {
+    container: {
+      flex: 1,
+      padding: 20,
+      backgroundColor: '#F2E9E4',
+    },
+    header: {
+      flex: 1,
+      justifyContent: 'center',
+    },
+    headerText: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: '#333',
+      textAlign: 'center',
+    },
+    inputContainer: {
+      flex: 1,
+    },
+    label: {
+      fontSize: 16,
+      marginBottom: 10,
+    },
+    input: {
+      borderColor: '#ddd',
+      borderWidth: 1,
+      padding: 10,
+      borderRadius: 5,
+    },
+    buttonsContainer: {
+      flex: 2,
+      justifyContent: 'space-between',
+    },
+  };
+  const Tab = createBottomTabNavigator();
   const [destroy$] = useState(new Subject());
-  // Новый стейт для отслеживания состояния поиска
-  const [isSearching, setIsSearching] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [, setUserId] = useState<string | null>(null);
   useEffect(() => {
     const fetchUserId = async () => {
       let id = await AsyncStorage.getItem('userId');
@@ -30,114 +64,6 @@ const LandingPage: React.FC<LandingPageProps> = ({navigation}) => {
     fetchUserId();
   }, []);
 
-  const connectToRoom = () => {
-    ApiService.connectToRoom(roomNumber)
-      .pipe(
-        takeUntil(destroy$),
-        catchError(error => {
-          console.error('Error connecting to room:', error);
-          return EMPTY; // Возвращаем пустой Observable
-        }),
-      )
-      .subscribe(
-        () => {
-          navigation.navigate('RoomPage', {roomNumber});
-        },
-        error => {
-          console.error('Error connecting to room:', error);
-        },
-      );
-  };
-
-  const handleCreateRoom = () => {
-    ApiService.createRoom()
-      .pipe(
-        switchMap(roomData => {
-          return ApiService.connectToRoom(roomData.roomNumber).pipe(
-            catchError(error => {
-              console.error('Error connecting to room:', error);
-              return EMPTY;
-            }),
-          );
-        }),
-        takeUntil(destroy$),
-      )
-      .subscribe(
-        roomData => {
-          navigation.navigate('RoomPage', {roomNumber: roomData.roomNumber});
-        },
-        error => {
-          console.error('Error creating and connecting to room:', error);
-        },
-      );
-  };
-
-  const handleStopSearch = () => {
-    if (!userId) {
-      return;
-    }
-    ApiService.stopSearch(userId)
-      .pipe(takeUntil(destroy$))
-      .subscribe(
-        () => {
-          setIsSearching(false); // обновляем стейт
-          console.log('Search stopped.');
-        },
-        error => {
-          setIsSearching(false);
-          console.error('Error stopping search:', error);
-        },
-      );
-  };
-
-  const handleSearchForChat = async () => {
-    if (!userId) {
-      return;
-    }
-
-    // Загрузка параметров из AsyncStorage
-    let loadedUserParameters = null;
-    let loadedSearchParameters = null;
-    try {
-      const rawDataUser = await AsyncStorage.getItem('userParameters');
-      loadedUserParameters = rawDataUser ? JSON.parse(rawDataUser) : null;
-
-      const rawDataSearch = await AsyncStorage.getItem('searchParameters');
-      loadedSearchParameters = rawDataSearch ? JSON.parse(rawDataSearch) : null;
-    } catch (error) {
-      console.error('Error loading parameters from AsyncStorage:', error);
-    }
-
-    setIsSearching(true);
-    ApiService.searchForChat(
-      userId,
-      loadedUserParameters,
-      loadedSearchParameters,
-    )
-      .pipe(
-        takeUntil(destroy$),
-        catchError(error => {
-          setIsSearching(false);
-          console.error('Error searching for chat:', error);
-          return EMPTY;
-        }),
-      )
-      .subscribe(
-        resultRoomNumber => {
-          setIsSearching(false);
-          if (resultRoomNumber) {
-            navigation.navigate('RoomPage', {roomNumber: resultRoomNumber});
-          } else {
-            console.log('Chat search ended with no result.');
-          }
-        },
-        error => {
-          setIsSearching(false);
-          console.error('Error in chat search:', error);
-        },
-      );
-  };
-
   useEffect(() => {
     return () => {
       destroy$.next(true);
@@ -145,29 +71,16 @@ const LandingPage: React.FC<LandingPageProps> = ({navigation}) => {
     };
   }, [destroy$]);
 
+  // @ts-ignore
   return (
-    <View>
-      <Text>Enter Room Number:</Text>
-      <TextInput
-        value={roomNumber}
-        onChangeText={setRoomNumber}
-        placeholder="Room Number"
-      />
-      <Button title="Connect" onPress={connectToRoom} />
-      <Button title="Create and Connect" onPress={handleCreateRoom} />
-      <Button
-        title="Edit Profile"
-        onPress={() => navigation.navigate('UserProfile')}
-      />
-      <Button
-        title="Edit Search Parameters"
-        onPress={() => navigation.navigate('SearchParameters')}
-      />
-      {isSearching ? (
-        <Button title="Stop Searching" onPress={handleStopSearch} />
-      ) : (
-        <Button title="Search for Chat" onPress={handleSearchForChat} />
-      )}
+    <View style={styles.container}>
+      {/*<View style={styles.header}>*/}
+      {/*  <Text style={styles.headerText}>GoVirt</Text>*/}
+      {/*</View>*/}
+      <Tab.Navigator initialRouteName="SearchPartner">
+        <Tab.Screen name="Search Partner" component={SearchPartnerTab} />
+        <Tab.Screen name="Connect to Room" component={ConnectRoomTab} />
+      </Tab.Navigator>
     </View>
   );
 };

@@ -8,6 +8,8 @@ import {
   Image,
   TouchableOpacity,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import {EMPTY, Subject, take} from 'rxjs';
 import {catchError, takeUntil} from 'rxjs/operators';
@@ -22,6 +24,54 @@ import Video from 'react-native-video';
 import Lightbox from 'react-native-lightbox-v2';
 
 const RoomPage: React.FC<any> = ({route}) => {
+  const styles = {
+    container: {
+      flex: 1,
+      padding: 10,
+      paddingBottom: 20,
+      backgroundColor: '#F2E9E4',
+    },
+    header: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: '#333',
+    },
+    messageContainer: {
+      padding: 5,
+      backgroundColor: 'white',
+      marginVertical: 5,
+      borderRadius: 5,
+      borderWidth: 1,
+      borderColor: '#ddd',
+    },
+    messageText: {
+      fontSize: 16,
+    },
+    messageUser: {
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#fff',
+      paddingHorizontal: 10,
+      borderTopWidth: 1,
+      borderColor: '#ddd',
+    },
+    input: {
+      flex: 1,
+      padding: 10,
+      borderWidth: 1,
+      borderColor: '#ddd',
+      borderRadius: 5,
+      marginRight: 10,
+    },
+    flatList: {
+      maxHeight: 100,
+    },
+  };
+
   const [roomData, setRoomData] = useState<{
     roomNumber: string;
     messages: Message[];
@@ -164,187 +214,204 @@ const RoomPage: React.FC<any> = ({route}) => {
   };
 
   return (
-    <View>
-      <Text>Room Number: {roomData.roomNumber}</Text>
-      <FlatList
-        data={roomData.messages}
-        keyExtractor={(item, key) => key.toString()}
-        renderItem={({item}) => (
-          <>
-            <Text>{item.user}</Text>
-            <Text>{item.content}</Text>
-            <FlatList
-              data={item.attachments}
-              keyExtractor={(item, key) => key.toString()}
-              renderItem={({item}) => {
-                if (item.type === 'image') {
-                  return (
-                    <Lightbox
-                      renderContent={() => {
-                        return (
-                          <Image
-                            source={{
-                              uri: 'http://localhost:3000/rooms/' + item.url,
-                            }}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              resizeMode: 'contain',
-                            }}
-                          />
-                        );
-                      }}
-                      underlayColor="white"
-                      springConfig={{tension: 15, friction: 7}}
-                      swipeToDismiss={true}>
-                      <Image
-                        source={{
-                          uri: 'http://localhost:3000/rooms/' + item.url,
-                        }}
-                        style={{width: 100, height: 100}}
-                      />
-                    </Lightbox>
-                  );
-                } else if (item.type === 'video') {
-                  return (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setCurrentVideo(null);
-                        setTimeout(() => {
-                          setCurrentVideo(
-                            'http://localhost:3000/rooms/' + item.url,
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{flex: 1}}>
+      <View style={styles.container}>
+        <Text style={styles.header}>Room Number: {roomData.roomNumber}</Text>
+        <FlatList
+          style={{flex: 1}}
+          data={roomData.messages}
+          keyExtractor={(item, key) => key.toString()}
+          renderItem={({item}) => (
+            <View style={styles.messageContainer}>
+              <Text style={styles.messageUser}>{item.user}</Text>
+              <Text style={styles.messageText}>{item.content}</Text>
+              <FlatList
+                horizontal={true}
+                data={item.attachments}
+                keyExtractor={(item, key) => key.toString()}
+                renderItem={({item}) => {
+                  if (item.type === 'image') {
+                    return (
+                      <Lightbox
+                        renderContent={() => {
+                          return (
+                            <Image
+                              source={{
+                                uri: 'http://localhost:3000/rooms/' + item.url,
+                              }}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                resizeMode: 'contain',
+                              }}
+                            />
                           );
-                          setVideoModalVisible(true);
-                        }, 10);
-                      }}>
-                      <Text>{videoModalVisible}</Text>
-                      <Video
-                        source={{
-                          uri: 'http://localhost:3000/rooms/' + item.url,
                         }}
-                        style={{width: 100, height: 100}}
-                        paused={true}
-                        controls={true}
-                      />
-                    </TouchableOpacity>
-                  );
-                }
-                return <></>;
-              }}
-            />
-          </>
-        )}
-      />
-      <TextInput
-        value={messageText}
-        onChangeText={setMessageText}
-        placeholder="Enter your message"
-      />
-      <Button title="Send" onPress={handleMessage} />
-      <Button title="Add attachment" onPress={handleChooseAttachment} />
-      <FlatList
-        data={uploadedAttachments}
-        keyExtractor={(item, key) => key.toString()}
-        renderItem={({item}) => {
-          if (item.type === 'image') {
-            return (
-              <Lightbox
-                renderContent={() => {
-                  return (
+                        underlayColor="white"
+                        springConfig={{tension: 15, friction: 7}}
+                        swipeToDismiss={true}>
+                        <Image
+                          source={{
+                            uri: 'http://localhost:3000/rooms/' + item.url,
+                          }}
+                          style={{width: 100, height: 100}}
+                        />
+                      </Lightbox>
+                    );
+                  } else if (item.type === 'video') {
+                    return (
+                      <TouchableOpacity
+                        onPress={() => {
+                          setCurrentVideo(null);
+                          setTimeout(() => {
+                            setCurrentVideo(
+                              'http://localhost:3000/rooms/' + item.url,
+                            );
+                            setVideoModalVisible(true);
+                          }, 10);
+                        }}>
+                        <Text>{videoModalVisible}</Text>
+                        <Video
+                          source={{
+                            uri: 'http://localhost:3000/rooms/' + item.url,
+                          }}
+                          style={{width: 100, height: 100}}
+                          paused={true}
+                          controls={true}
+                        />
+                      </TouchableOpacity>
+                    );
+                  }
+                  return <></>;
+                }}
+              />
+            </View>
+          )}
+        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            value={messageText}
+            onChangeText={setMessageText}
+            placeholder="Enter your message"
+          />
+          <Button title="Send" onPress={handleMessage} />
+          <Button title="Add attachment" onPress={handleChooseAttachment} />
+        </View>
+        {uploadedAttachments.length > 0 && (
+          <FlatList
+            style={styles.flatList}
+            horizontal={true}
+            data={uploadedAttachments}
+            keyExtractor={(item, key) => key.toString()}
+            contentContainerStyle={{height: 20}}
+            renderItem={({item}) => {
+              if (item.type === 'image') {
+                return (
+                  <Lightbox
+                    renderContent={() => {
+                      return (
+                        <Image
+                          source={{
+                            uri: 'http://localhost:3000/rooms/' + item.url,
+                          }}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            resizeMode: 'contain',
+                          }}
+                        />
+                      );
+                    }}
+                    underlayColor="white"
+                    springConfig={{tension: 15, friction: 7}}
+                    swipeToDismiss={true}>
                     <Image
                       source={{uri: 'http://localhost:3000/rooms/' + item.url}}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        resizeMode: 'contain',
-                      }}
+                      style={{width: 100, height: 100}}
                     />
-                  );
-                }}
-                underlayColor="white"
-                springConfig={{tension: 15, friction: 7}}
-                swipeToDismiss={true}>
-                <Image
-                  source={{uri: 'http://localhost:3000/rooms/' + item.url}}
-                  style={{width: 100, height: 100}}
-                />
-              </Lightbox>
-            );
-          } else if (item.type === 'video') {
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  setCurrentVideo(null);
-                  setTimeout(() => {
-                    setCurrentVideo('http://localhost:3000/rooms/' + item.url);
-                    setVideoModalVisible(true);
-                  }, 10);
-                }}>
-                <Text>{videoModalVisible}</Text>
-                <Video
-                  source={{uri: 'http://localhost:3000/rooms/' + item.url}}
-                  style={{width: 100, height: 100}}
-                  paused={true}
-                  controls={true}
-                />
-              </TouchableOpacity>
-            );
-          }
-          return <></>;
-        }}
-      />
-
-      <Modal
-        animationType="slide"
-        transparent={false}
-        visible={videoModalVisible}
-        // Не работает
-        onTouchStart={() => {
-          setVideoModalVisible(false);
-          setCurrentVideo(null);
-        }}
-        // Не работает
-        onDismiss={() => {
-          setVideoModalVisible(false);
-          setCurrentVideo(null);
-        }}
-        // Не работает
-        onRequestClose={() => {
-          setVideoModalVisible(false);
-          setCurrentVideo(null);
-        }}>
-        <View
-          style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}
+                  </Lightbox>
+                );
+              } else if (item.type === 'video') {
+                return (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setCurrentVideo(null);
+                      setTimeout(() => {
+                        setCurrentVideo(
+                          'http://localhost:3000/rooms/' + item.url,
+                        );
+                        setVideoModalVisible(true);
+                      }, 10);
+                    }}>
+                    <Text>{videoModalVisible}</Text>
+                    <Video
+                      source={{uri: 'http://localhost:3000/rooms/' + item.url}}
+                      style={{width: 100, height: 100}}
+                      paused={true}
+                      controls={true}
+                    />
+                  </TouchableOpacity>
+                );
+              }
+              return <></>;
+            }}
+          />
+        )}
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={videoModalVisible}
+          // Не работает
           onTouchStart={() => {
             setVideoModalVisible(false);
             setCurrentVideo(null);
           }}
-          // Костыль просто для проверки
-        >
-          <Video
-            source={{uri: currentVideo} as any}
-            style={{width: '100%', height: '100%'}}
-            controls={true}
-            paused={false}
-            fullscreenAutorotate={true}
-            // Не работает
-            onFullscreenPlayerDidDismiss={() => {
+          // Не работает
+          onDismiss={() => {
+            setVideoModalVisible(false);
+            setCurrentVideo(null);
+          }}
+          // Не работает
+          onRequestClose={() => {
+            setVideoModalVisible(false);
+            setCurrentVideo(null);
+          }}>
+          <View
+            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}
+            onTouchStart={() => {
               setVideoModalVisible(false);
               setCurrentVideo(null);
             }}
-            onRestoreUserInterfaceForPictureInPictureStop={() => {
-              setVideoModalVisible(false);
-              setCurrentVideo(null);
-            }}
-            // onAccessibilityAction={event => {
-            //   console.log(event);
-            // }}
-            onEnd={() => setVideoModalVisible(false)}
-          />
-        </View>
-      </Modal>
-      {error && <Text style={{color: 'red'}}>{error}</Text>}
-    </View>
+            // Костыль просто для проверки
+          >
+            <Video
+              source={{uri: currentVideo} as any}
+              style={{width: '100%', height: '100%'}}
+              controls={true}
+              paused={false}
+              fullscreenAutorotate={true}
+              // Не работает
+              onFullscreenPlayerDidDismiss={() => {
+                setVideoModalVisible(false);
+                setCurrentVideo(null);
+              }}
+              onRestoreUserInterfaceForPictureInPictureStop={() => {
+                setVideoModalVisible(false);
+                setCurrentVideo(null);
+              }}
+              // onAccessibilityAction={event => {
+              //   console.log(event);
+              // }}
+              onEnd={() => setVideoModalVisible(false)}
+            />
+          </View>
+        </Modal>
+        {error && <Text style={{color: 'red'}}>{error}</Text>}
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 

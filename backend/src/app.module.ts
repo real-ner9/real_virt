@@ -24,7 +24,7 @@ import { HeaderResolver, I18nModule } from 'nestjs-i18n';
     ),
     RoomsModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, 'file-store'),
+      rootPath: join(__dirname, '../', 'file-store'),
       serveRoot: '/rooms/file-store/',
     }),
     BotModule,

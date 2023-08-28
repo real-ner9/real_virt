@@ -158,13 +158,13 @@ export class RoomsService {
             // Тут вы можете проверять параметры userParameters и searchParameters
             // и определить, подходят ли они друг другу
 
-            const partner = this.waitingQueue[id];
-            return this.doTheyMatch(
-              userParameters,
-              partner.userParameters,
-              searchParameters,
-              partner.searchParameters,
-            );
+            return this.waitingQueue[id];
+            // return this.doTheyMatch(
+            //   userParameters,
+            //   partner.userParameters,
+            //   searchParameters,
+            //   partner.searchParameters,
+            // );
           });
 
           if (partnerId) {
