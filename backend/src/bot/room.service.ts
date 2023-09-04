@@ -4,6 +4,15 @@ import { Injectable } from '@nestjs/common';
 export class RoomsService {
   private rooms: Room[] = [];
 
+  constructor() {
+    // Запуск функции удаления неактивных комнат каждые 10 минут
+    setInterval(() => this.removeInactiveRooms(), 10 * 60 * 1000);
+  }
+
+  private removeInactiveRooms(): void {
+    this.rooms = this.rooms.filter((room) => room.active);
+  }
+
   createRoom(userId: string): Room {
     const room: Room = {
       id: Date.now().toString(),
