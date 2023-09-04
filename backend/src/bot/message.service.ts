@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Telegraf } from 'telegraf';
-import { RoomsService } from './room.service';
+import { Markup, Telegraf } from 'telegraf';
+import { UserService } from './user.service';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class MessageService {
@@ -14,28 +15,35 @@ export class MessageService {
     video_note: 'sendVideoNote',
   };
 
-  constructor(private readonly roomsService: RoomsService) {}
+  constructor(private readonly userService: UserService) {}
 
   async forwardMessage(bot: Telegraf, ctx): Promise<void> {
     const userId = ctx.from.id.toString();
-    const room = this.roomsService.findRoomByUserId(userId);
+    const currentPartnerId = this.userService.getCurrentPartner(userId);
 
-    if (room && room.active) {
-      const partnerId = room.users.find((u) => u !== userId);
-      if (partnerId) {
-        const messageType = Object.keys(this.MESSAGE_TYPES).find(
-          (type) => ctx.message[type],
-        );
-        if (messageType) {
-          const method = this.MESSAGE_TYPES[messageType];
-          let content = ctx.message[messageType];
-          if (messageType === 'photo' && Array.isArray(content)) {
-            content = content[0];
-          }
+    if (!currentPartnerId) {
+      const findPartnerKeyboard = Markup.inlineKeyboard([
+        Markup.button.callback('Найти партнера', 'find_partner'),
+      ]);
 
-          bot.telegram[method](partnerId, content.file_id || content);
-        }
+      ctx.reply(
+        'Кажется, ты заблудился...\nПо вопросам работы сервиса пиши в чат @govirtchat',
+        findPartnerKeyboard,
+      );
+      return;
+    }
+
+    const messageType = Object.keys(this.MESSAGE_TYPES).find(
+      (type) => ctx.message[type],
+    );
+    if (messageType) {
+      const method = this.MESSAGE_TYPES[messageType];
+      let content = ctx.message[messageType];
+      if (messageType === 'photo' && Array.isArray(content)) {
+        content = content[0];
       }
+
+      return bot.telegram[method](currentPartnerId, content.file_id || content);
     }
   }
 }

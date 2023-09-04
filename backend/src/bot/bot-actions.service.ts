@@ -4,6 +4,21 @@ import { Markup } from 'telegraf';
 import { I18nService } from 'nestjs-i18n';
 import { MessageService } from './message.service';
 import { RoomsService } from './room.service';
+import { UserService } from './user.service';
+
+async function safeExecute(fn: Function, ctx, ...args: any[]) {
+  try {
+    await fn(ctx, ...args);
+  } catch (error) {
+    console.error('An error:', error);
+    ctx.reply(
+      `Кажется, что-то пошло не так...\n
+       По вопросам работы сервиса пиши в чат @govirtchat
+      `,
+      this.getFindPartnerKeyboard(),
+    );
+  }
+}
 
 @Injectable()
 export class BotActionsService {
@@ -14,38 +29,59 @@ export class BotActionsService {
     private readonly i18n: I18nService,
     private readonly messageService: MessageService,
     private readonly roomsService: RoomsService,
+    private readonly userService: UserService,
   ) {}
 
   init(): void {
     this.bot = new Telegraf(process.env.BOT_TOKEN);
-    this.bot.start(this.onBotStart.bind(this));
-    this.bot.command('restart', this.onBotRestart.bind(this));
-    this.bot.hears(
-      this.i18n.t('events.findPartner', { lang: this.lang }),
-      this.onFindPartner.bind(this),
-    );
-    this.bot.hears(
-      this.i18n.t('events.stopSearch', { lang: this.lang }),
-      this.onStopSearch.bind(this),
-    );
-    this.bot.hears(
-      this.i18n.t('events.changePartner', { lang: this.lang }),
-      this.onChangePartner.bind(this),
-    );
 
-    this.bot.hears(
-      this.i18n.t('events.endChat', { lang: this.lang }),
-      this.onEndChat.bind(this),
+    this.bot.start((ctx) => safeExecute(this.onBotStart.bind(this), ctx));
+    this.bot.hears('/restart', (ctx) =>
+      safeExecute(this.onBotRestart.bind(this), ctx),
     );
-
-    this.bot.on('message', (ctx) => {
-      this.messageService.forwardMessage(this.bot, ctx);
+    this.bot.hears('/find', (ctx) =>
+      safeExecute(this.onFindPartner.bind(this), ctx),
+    );
+    this.bot.hears('/stop', (ctx) =>
+      safeExecute(this.onStopSearch.bind(this), ctx),
+    );
+    this.bot.hears('/change', (ctx) =>
+      safeExecute(this.onChangePartner.bind(this), ctx),
+    );
+    this.bot.hears('/end', (ctx) =>
+      safeExecute(this.onEndChat.bind(this), ctx),
+    );
+    this.bot.on('message', async (ctx) => {
+      try {
+        await this.messageService.forwardMessage(this.bot, ctx);
+      } catch (error) {
+        console.error('An error occurred while forwarding a message:', error);
+        ctx.reply(
+          `Кажется, что-то пошло не так...\nПо вопросам работы сервиса пишите в чат @govirtchat`,
+          this.getFindPartnerKeyboard(),
+        );
+        return;
+      }
     });
+
+    this.bot.action('find_partner', (ctx) =>
+      safeExecute(this.onFindPartner.bind(this), ctx),
+    );
+    this.bot.action('stop_search', (ctx) =>
+      safeExecute(this.onStopSearch.bind(this), ctx),
+    );
+    this.bot.action('change_partner', (ctx) =>
+      safeExecute(this.onChangePartner.bind(this), ctx),
+    );
+    this.bot.action('end_chat', (ctx) =>
+      safeExecute(this.onEndChat.bind(this), ctx),
+    );
 
     this.bot.launch();
   }
 
   async onBotStart(ctx): Promise<void> {
+    await this.onEndChat(ctx, false);
     ctx.reply(
       this.i18n.t('events.welcome', { lang: this.lang }),
       this.getFindPartnerKeyboard(),
@@ -53,6 +89,7 @@ export class BotActionsService {
   }
 
   async onBotRestart(ctx): Promise<void> {
+    await this.onEndChat(ctx, false);
     ctx.reply(
       this.i18n.t('events.botRestarted', { lang: this.lang }),
       this.getFindPartnerKeyboard(),
@@ -60,6 +97,7 @@ export class BotActionsService {
   }
 
   async onFindPartner(ctx): Promise<void> {
+    await this.onEndChat(ctx, false);
     await ctx.reply(
       this.i18n.t('events.searchPartner', { lang: this.lang }),
       this.getStopSearchKeyboard(),
@@ -68,6 +106,7 @@ export class BotActionsService {
   }
 
   async onStopSearch(ctx): Promise<void> {
+    await this.onEndChat(ctx, false);
     ctx.reply(
       this.i18n.t('events.stopPartnerSearch', { lang: this.lang }),
       this.getFindPartnerKeyboard(),
@@ -76,29 +115,45 @@ export class BotActionsService {
   }
 
   getFindPartnerKeyboard(): any {
-    return Markup.keyboard([
-      [this.i18n.t('events.findPartner', { lang: this.lang })],
-    ]).resize();
+    return Markup.inlineKeyboard([
+      Markup.button.callback(
+        this.i18n.t('events.findPartner', { lang: this.lang }),
+        'find_partner',
+      ),
+    ]);
   }
 
   getStopSearchKeyboard(): any {
-    return Markup.keyboard([
-      [this.i18n.t('events.stopSearch', { lang: this.lang })],
-    ]).resize();
+    return Markup.inlineKeyboard([
+      Markup.button.callback(
+        this.i18n.t('events.stopSearch', { lang: this.lang }),
+        'stop_search',
+      ),
+    ]);
   }
 
   async findPartner(ctx): Promise<void> {
     const userId = ctx.from.id.toString();
-    let room = this.roomsService.findSingleUserRoom(userId);
+    let room = this.roomsService.findSingleUserRoom(
+      userId,
+      this.userService.getPastPartners(userId),
+    );
 
     if (room) {
       room = this.roomsService.addUserToRoom(userId, room);
+      this.userService.setActiveRoom(userId, room.id);
 
       // Клавиатура с двумя кнопками
-      const partnerChatKeyboard = Markup.keyboard([
-        [this.i18n.t('events.changePartner', { lang: this.lang })],
-        [this.i18n.t('events.endChat', { lang: this.lang })],
-      ]).resize();
+      const partnerChatKeyboard = Markup.inlineKeyboard([
+        Markup.button.callback(
+          this.i18n.t('events.changePartner', { lang: this.lang }),
+          'change_partner',
+        ),
+        Markup.button.callback(
+          this.i18n.t('events.endChat', { lang: this.lang }),
+          'end_chat',
+        ),
+      ]);
 
       ctx.reply(
         this.i18n.t('events.connectedWithPartner', { lang: this.lang }),
@@ -106,6 +161,10 @@ export class BotActionsService {
       );
 
       const partnerId = room.users.find((u) => u !== userId);
+      this.userService.setActiveRoom(partnerId, room.id);
+      this.userService.setCurrentPartner(userId, partnerId);
+      this.userService.setCurrentPartner(partnerId, userId);
+
       this.bot.telegram.sendMessage(
         partnerId,
         this.i18n.t('events.connectedWithPartner', { lang: this.lang }),
@@ -113,22 +172,32 @@ export class BotActionsService {
       );
     } else {
       room = this.roomsService.createRoom(userId);
+      this.userService.setActiveRoom(userId, room.id);
     }
   }
 
-  async onEndChat(ctx): Promise<void> {
+  async onEndChat(ctx, showKeyboard = true): Promise<void> {
     const userId = ctx.from.id.toString();
     const room = this.roomsService.findRoomByUserId(userId);
 
     if (room && room.active) {
       const partnerId = room.users.find((u) => u !== userId);
-      this.roomsService.deactivateRoom(room);
+      if (partnerId) {
+        this.userService.setCurrentPartner(partnerId, null);
+        this.userService.addPastPartner(userId, partnerId);
+        this.userService.addPastPartner(partnerId, userId);
+        this.roomsService.deactivateRoom(room);
+        this.bot.telegram.sendMessage(
+          partnerId,
+          this.i18n.t('events.chatEnded', { lang: this.lang }),
+          this.getFindPartnerKeyboard(),
+        );
+      }
+    }
+
+    this.userService.setCurrentPartner(userId, null);
+    if (showKeyboard) {
       ctx.reply(
-        this.i18n.t('events.chatEnded', { lang: this.lang }),
-        this.getFindPartnerKeyboard(),
-      );
-      this.bot.telegram.sendMessage(
-        partnerId,
         this.i18n.t('events.chatEnded', { lang: this.lang }),
         this.getFindPartnerKeyboard(),
       );
@@ -143,7 +212,7 @@ export class BotActionsService {
   }
 
   async onChangePartner(ctx): Promise<void> {
-    await this.onEndChat(ctx);
+    await this.onEndChat(ctx, false);
     await this.onFindPartner(ctx);
   }
 }

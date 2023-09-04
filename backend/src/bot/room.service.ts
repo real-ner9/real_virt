@@ -1,10 +1,24 @@
 import { Injectable } from '@nestjs/common';
+import { UserService } from './user.service';
 
 @Injectable()
 export class RoomsService {
-  private rooms: Room[] = [];
+  rooms: Room[] = [];
+
+  constructor(private userService: UserService) {
+    // Запуск функции удаления неактивных комнат каждые 10 минут
+    setInterval(() => this.removeInactiveRooms(), 10 * 60 * 1000);
+  }
+
+  private removeInactiveRooms(): void {
+    this.rooms = this.rooms.filter((room) => room.active);
+  }
 
   createRoom(userId: string): Room {
+    const activeRoom = this.findRoomByUserId(userId);
+    if (activeRoom) {
+      return activeRoom;
+    }
     const room: Room = {
       id: Date.now().toString(),
       users: [userId],
@@ -14,10 +28,13 @@ export class RoomsService {
     return room;
   }
 
-  findSingleUserRoom(userId: string): Room | undefined {
+  findSingleUserRoom(userId: string, pastPartners: string[]): Room | undefined {
     return this.rooms.find(
       (room) =>
-        room.users.length === 1 && room.active && room.users[0] !== userId,
+        room.users.length === 1 &&
+        room.active &&
+        room.users[0] !== userId &&
+        !pastPartners.some((pastPartner) => pastPartner === room.users[0]),
     );
   }
 
