@@ -13,7 +13,7 @@ async function safeExecute(fn: Function, ctx, ...args: any[]) {
     console.error('An error:', error);
     ctx.reply(
       `Кажется, что-то пошло не так...\n
-       По вопросам работы сервиса пишите в чат @govirtchat
+       По вопросам работы сервиса пиши в чат @govirtchat
       `,
       this.getFindPartnerKeyboard(),
     );
@@ -36,7 +36,7 @@ export class BotActionsService {
     this.bot = new Telegraf(process.env.BOT_TOKEN);
 
     this.bot.start((ctx) => safeExecute(this.onBotStart.bind(this), ctx));
-    this.bot.command('/restart', (ctx) =>
+    this.bot.hears('/restart', (ctx) =>
       safeExecute(this.onBotRestart.bind(this), ctx),
     );
     this.bot.hears('/find', (ctx) =>
@@ -81,6 +81,7 @@ export class BotActionsService {
   }
 
   async onBotStart(ctx): Promise<void> {
+    await this.onEndChat(ctx, false);
     ctx.reply(
       this.i18n.t('events.welcome', { lang: this.lang }),
       this.getFindPartnerKeyboard(),

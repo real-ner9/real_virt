@@ -26,7 +26,10 @@ export class MessageService {
         Markup.button.callback('Найти партнера', 'find_partner'),
       ]);
 
-      ctx.reply('Кажется, ты заблудился...', findPartnerKeyboard);
+      ctx.reply(
+        'Кажется, ты заблудился...\nПо вопросам работы сервиса пиши в чат @govirtchat',
+        findPartnerKeyboard,
+      );
       return;
     }
 
