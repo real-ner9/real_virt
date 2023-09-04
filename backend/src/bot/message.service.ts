@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Markup, Telegraf } from 'telegraf';
 import { UserService } from './user.service';
-import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class MessageService {
@@ -26,10 +25,12 @@ export class MessageService {
         Markup.button.callback('Найти партнера', 'find_partner'),
       ]);
 
-      ctx.reply(
-        'Кажется, ты заблудился...\nПо вопросам работы сервиса пиши в чат @govirtchat',
-        findPartnerKeyboard,
-      );
+      ctx
+        .reply(
+          'Кажется, ты заблудился...\nПо вопросам работы сервиса пиши в чат @govirtchat',
+          findPartnerKeyboard,
+        )
+        .catch((err) => console.log(err));
       return;
     }
 
@@ -43,7 +44,12 @@ export class MessageService {
         content = content[0];
       }
 
-      return bot.telegram[method](currentPartnerId, content.file_id || content);
+      return bot.telegram[method](
+        currentPartnerId,
+        content.file_id || content,
+      ).catch((err) => {
+        console.error('bot error: ', err);
+      });
     }
   }
 }

@@ -11,12 +11,12 @@ async function safeExecute(fn: Function, ctx, ...args: any[]) {
     await fn(ctx, ...args);
   } catch (error) {
     console.error('An error:', error);
-    ctx.reply(
-      `Кажется, что-то пошло не так...\n
-       По вопросам работы сервиса пиши в чат @govirtchat
-      `,
-      this.getFindPartnerKeyboard(),
-    );
+    ctx
+      .reply(
+        `Кажется, что-то пошло не так...\nПо вопросам работы сервиса пиши в чат @govirtchat`,
+        this.getFindPartnerKeyboard(),
+      )
+      .catch((err) => console.log(err));
   }
 }
 
@@ -35,82 +35,184 @@ export class BotActionsService {
   init(): void {
     this.bot = new Telegraf(process.env.BOT_TOKEN);
 
-    this.bot.start((ctx) => safeExecute(this.onBotStart.bind(this), ctx));
-    this.bot.hears('/restart', (ctx) =>
-      safeExecute(this.onBotRestart.bind(this), ctx),
-    );
-    this.bot.hears('/find', (ctx) =>
-      safeExecute(this.onFindPartner.bind(this), ctx),
-    );
-    this.bot.hears('/stop', (ctx) =>
-      safeExecute(this.onStopSearch.bind(this), ctx),
-    );
-    this.bot.hears('/change', (ctx) =>
-      safeExecute(this.onChangePartner.bind(this), ctx),
-    );
-    this.bot.hears('/end', (ctx) =>
-      safeExecute(this.onEndChat.bind(this), ctx),
-    );
-    this.bot.on('message', async (ctx) => {
-      try {
-        await this.messageService.forwardMessage(this.bot, ctx);
-      } catch (error) {
-        console.error('An error occurred while forwarding a message:', error);
-        ctx.reply(
-          `Кажется, что-то пошло не так...\nПо вопросам работы сервиса пишите в чат @govirtchat`,
-          this.getFindPartnerKeyboard(),
-        );
-        return;
-      }
+    this.bot.catch((err) => {
+      console.error('bot error: ', err);
     });
 
-    this.bot.action('find_partner', (ctx) =>
-      safeExecute(this.onFindPartner.bind(this), ctx),
-    );
-    this.bot.action('stop_search', (ctx) =>
-      safeExecute(this.onStopSearch.bind(this), ctx),
-    );
-    this.bot.action('change_partner', (ctx) =>
-      safeExecute(this.onChangePartner.bind(this), ctx),
-    );
-    this.bot.action('end_chat', (ctx) =>
-      safeExecute(this.onEndChat.bind(this), ctx),
-    );
+    this.bot
+      .start(async (ctx) => {
+        try {
+          await safeExecute(this.onBotStart.bind(this), ctx);
+        } catch (e) {
+          console.error(e);
+        }
+      })
+      .catch((err) => {
+        console.error('bot error: ', err);
+      });
+    this.bot
+      .hears('/restart', async (ctx) => {
+        try {
+          await safeExecute(this.onBotRestart.bind(this), ctx);
+        } catch (e) {
+          console.error(e);
+        }
+      })
+      .catch((err) => {
+        console.error('bot error: ', err);
+      });
+    this.bot
+      .hears('/find', async (ctx) => {
+        try {
+          await safeExecute(this.onFindPartner.bind(this), ctx);
+        } catch (e) {
+          console.error(e);
+        }
+      })
+      .catch((err) => {
+        console.error('bot error: ', err);
+      });
+    this.bot
+      .hears('/stop', async (ctx) => {
+        try {
+          await safeExecute(this.onStopSearch.bind(this), ctx);
+        } catch (e) {
+          console.error(e);
+        }
+      })
+      .catch((err) => {
+        console.error('bot error: ', err);
+      });
+    this.bot
+      .hears('/change', async (ctx) => {
+        try {
+          await safeExecute(this.onChangePartner.bind(this), ctx);
+        } catch (e) {
+          console.error(e);
+        }
+      })
+      .catch((err) => {
+        console.error('bot error: ', err);
+      });
+    this.bot
+      .hears('/end', async (ctx) => {
+        try {
+          await safeExecute(this.onEndChat.bind(this), ctx);
+        } catch (e) {
+          console.error(e);
+        }
+      })
+      .catch((err) => {
+        console.error('bot error: ', err);
+      });
+    this.bot
+      .on('message', async (ctx) => {
+        try {
+          await this.messageService.forwardMessage(this.bot, ctx);
+        } catch (error) {
+          console.error('An error occurred while forwarding a message:', error);
+          ctx
+            .reply(
+              `Кажется, что-то пошло не так...\nПо вопросам работы сервиса пишите в чат @govirtchat`,
+              this.getFindPartnerKeyboard(),
+            )
+            .catch((err) => console.log(err));
+          return;
+        }
+      })
+      .catch((err) => {
+        console.error('bot error: ', err);
+      });
 
-    this.bot.launch();
+    this.bot
+      .action('find_partner', async (ctx) => {
+        try {
+          await safeExecute(this.onFindPartner.bind(this), ctx);
+        } catch (e) {
+          console.error(e);
+        }
+      })
+      .catch((err) => {
+        console.error('bot error: ', err);
+      });
+    this.bot
+      .action('stop_search', async (ctx) => {
+        try {
+          await safeExecute(this.onStopSearch.bind(this), ctx);
+        } catch (e) {
+          console.error(e);
+        }
+      })
+      .catch((err) => {
+        console.error('bot error: ', err);
+      });
+    this.bot
+      .action('change_partner', async (ctx) => {
+        try {
+          await safeExecute(this.onChangePartner.bind(this), ctx);
+        } catch (e) {
+          console.error(e);
+        }
+      })
+      .catch((err) => {
+        console.error('bot error: ', err);
+      });
+    this.bot
+      .action('end_chat', async (ctx) => {
+        try {
+          await safeExecute(this.onEndChat.bind(this), ctx);
+        } catch (e) {
+          console.error(e);
+        }
+      })
+      .catch((err) => {
+        console.error('bot error: ', err);
+      });
+
+    this.bot.launch().catch((err) => {
+      console.error('bot error: ', err);
+    });
   }
 
   async onBotStart(ctx): Promise<void> {
     await this.onEndChat(ctx, false);
-    ctx.reply(
-      this.i18n.t('events.welcome', { lang: this.lang }),
-      this.getFindPartnerKeyboard(),
-    );
+    ctx
+      .reply(
+        this.i18n.t('events.welcome', { lang: this.lang }),
+        this.getFindPartnerKeyboard(),
+      )
+      .catch((err) => console.log(err));
   }
 
   async onBotRestart(ctx): Promise<void> {
     await this.onEndChat(ctx, false);
-    ctx.reply(
-      this.i18n.t('events.botRestarted', { lang: this.lang }),
-      this.getFindPartnerKeyboard(),
-    );
+    ctx
+      .reply(
+        this.i18n.t('events.botRestarted', { lang: this.lang }),
+        this.getFindPartnerKeyboard(),
+      )
+      .catch((err) => console.log(err));
   }
 
   async onFindPartner(ctx): Promise<void> {
     await this.onEndChat(ctx, false);
-    await ctx.reply(
-      this.i18n.t('events.searchPartner', { lang: this.lang }),
-      this.getStopSearchKeyboard(),
-    );
+    await ctx
+      .reply(
+        this.i18n.t('events.searchPartner', { lang: this.lang }),
+        this.getStopSearchKeyboard(),
+      )
+      .catch((err) => console.log(err));
     await this.findPartner(ctx);
   }
 
   async onStopSearch(ctx): Promise<void> {
     await this.onEndChat(ctx, false);
-    ctx.reply(
-      this.i18n.t('events.stopPartnerSearch', { lang: this.lang }),
-      this.getFindPartnerKeyboard(),
-    );
+    ctx
+      .reply(
+        this.i18n.t('events.stopPartnerSearch', { lang: this.lang }),
+        this.getFindPartnerKeyboard(),
+      )
+      .catch((err) => console.log(err));
     await this.stopSearch(ctx);
   }
 
@@ -155,21 +257,34 @@ export class BotActionsService {
         ),
       ]);
 
-      ctx.reply(
-        this.i18n.t('events.connectedWithPartner', { lang: this.lang }),
-        partnerChatKeyboard,
-      );
+      ctx
+        .reply(
+          this.i18n.t('events.connectedWithPartner', { lang: this.lang }),
+          partnerChatKeyboard,
+        )
+        .catch((err) => console.log(err));
 
       const partnerId = room.users.find((u) => u !== userId);
       this.userService.setActiveRoom(partnerId, room.id);
       this.userService.setCurrentPartner(userId, partnerId);
       this.userService.setCurrentPartner(partnerId, userId);
 
-      this.bot.telegram.sendMessage(
-        partnerId,
-        this.i18n.t('events.connectedWithPartner', { lang: this.lang }),
-        partnerChatKeyboard,
-      );
+      this.bot.telegram
+        .sendMessage(
+          partnerId,
+          this.i18n.t('events.connectedWithPartner', { lang: this.lang }),
+          partnerChatKeyboard,
+        )
+        .then()
+        .catch((error) => {
+          console.error('An error:', error);
+          ctx
+            .reply(
+              `Кажется, что-то пошло не так...\nПо вопросам работы сервиса пиши в чат @govirtchat`,
+              this.getFindPartnerKeyboard(),
+            )
+            .catch((err) => console.log(err));
+        });
     } else {
       room = this.roomsService.createRoom(userId);
       this.userService.setActiveRoom(userId, room.id);
@@ -187,20 +302,31 @@ export class BotActionsService {
         this.userService.addPastPartner(userId, partnerId);
         this.userService.addPastPartner(partnerId, userId);
         this.roomsService.deactivateRoom(room);
-        this.bot.telegram.sendMessage(
-          partnerId,
-          this.i18n.t('events.chatEnded', { lang: this.lang }),
-          this.getFindPartnerKeyboard(),
-        );
+        this.bot.telegram
+          .sendMessage(
+            partnerId,
+            this.i18n.t('events.chatEnded', { lang: this.lang }),
+            this.getFindPartnerKeyboard(),
+          )
+          .then()
+          .catch((error) => {
+            console.error('An error:', error);
+            ctx.reply(
+              `Кажется, что-то пошло не так...\nПо вопросам работы сервиса пиши в чат @govirtchat`,
+              this.getFindPartnerKeyboard(),
+            );
+          });
       }
     }
 
     this.userService.setCurrentPartner(userId, null);
     if (showKeyboard) {
-      ctx.reply(
-        this.i18n.t('events.chatEnded', { lang: this.lang }),
-        this.getFindPartnerKeyboard(),
-      );
+      ctx
+        .reply(
+          this.i18n.t('events.chatEnded', { lang: this.lang }),
+          this.getFindPartnerKeyboard(),
+        )
+        .catch((err) => console.log(err));
     }
   }
 

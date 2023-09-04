@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class UserService {
-  deleteDelay = 5 * 60 * 60 * 1000;
+  deleteDelay = 1 * 60 * 60 * 1000;
   users: Record<
     string,
     {
