@@ -53,6 +53,14 @@ export class RoomsService {
   deactivateRoom(room: Room): void {
     room.active = false;
   }
+
+  getActiveRoomsCount(isPair = false): number {
+    return (
+      this.rooms?.filter(
+        (room) => room.active && (isPair ? room.users?.length === 2 : true),
+      )?.length || 0
+    );
+  }
 }
 
 interface Room {

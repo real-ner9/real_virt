@@ -4,6 +4,7 @@ import { RoomsService } from './room.service';
 import { BotActionsService } from './bot-actions.service';
 import { MessageService } from './message.service';
 import { UserService } from './user.service';
+import { BotController } from './bot.controller';
 
 @Module({
   providers: [
@@ -13,5 +14,6 @@ import { UserService } from './user.service';
     MessageService,
     UserService,
   ],
+  controllers: [BotController],
 })
 export class BotModule {}

@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
+export type UserFlag = 'all' | 'activeRoom' | 'currentPartner';
+
 @Injectable()
 export class UserService {
-  deleteDelay = 1 * 60 * 60 * 1000;
+  // deleteDelay = 1 * 60 * 60 * 1000; // в часах
+  deleteDelay = 30 * 60 * 1000; // пока оставлю 30 минут, так как мало пользователей
   users: Record<
     string,
     {
@@ -77,5 +80,30 @@ export class UserService {
 
   getCurrentPartner(userId: string): string {
     return this.users[userId]?.currentPartner || null;
+  }
+  countUsers(flag: UserFlag): number {
+    let count = 0;
+
+    for (const userId in this.users) {
+      const user = this.users[userId];
+
+      switch (flag) {
+        case 'all':
+          count++;
+          break;
+        case 'activeRoom':
+          if (user.activeRoom && !user.currentPartner) {
+            count++;
+          }
+          break;
+        case 'currentPartner':
+          if (user.currentPartner) {
+            count++;
+          }
+          break;
+      }
+    }
+
+    return count;
   }
 }
