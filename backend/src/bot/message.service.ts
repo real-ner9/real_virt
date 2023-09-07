@@ -16,19 +16,19 @@ export class MessageService {
 
   constructor(private readonly userService: UserService) {}
 
+  findPartnerKeyboard = Markup.inlineKeyboard([
+    Markup.button.callback('Найти партнера', 'find_partner'),
+  ]);
+
   async forwardMessage(bot: Telegraf, ctx): Promise<void> {
     const userId = ctx.from.id.toString();
-    const currentPartnerId = this.userService.getCurrentPartner(userId);
+    const currentPartnerId = await this.userService.getCurrentPartner(userId);
 
     if (!currentPartnerId) {
-      const findPartnerKeyboard = Markup.inlineKeyboard([
-        Markup.button.callback('Найти партнера', 'find_partner'),
-      ]);
-
-      ctx
+      await ctx
         .reply(
           'Кажется, ты заблудился...\nПо вопросам работы сервиса пиши в чат @govirtchat',
-          findPartnerKeyboard,
+          this.findPartnerKeyboard,
         )
         .catch((err) => console.log(err));
       return;
@@ -47,8 +47,18 @@ export class MessageService {
       return bot.telegram[method](
         currentPartnerId,
         content.file_id || content,
-      ).catch((err) => {
-        console.error('bot error: ', err);
+      ).catch(async (err: any) => {
+        console.error('message to user error: ', err.message);
+
+        if (err.code === 403) {
+          if (currentPartnerId) {
+            await this.userService.blockUser(currentPartnerId);
+
+            await ctx
+              .reply('Упс, пользователь покинул чат', this.findPartnerKeyboard)
+              .catch((err) => console.log(err));
+          }
+        }
       });
     }
   }

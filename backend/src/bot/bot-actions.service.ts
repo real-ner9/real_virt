@@ -5,6 +5,7 @@ import { I18nService } from 'nestjs-i18n';
 import { MessageService } from './message.service';
 import { RoomsService } from './room.service';
 import { UserService } from './user.service';
+import * as process from 'process';
 
 async function safeExecute(fn: Function, ctx, ...args: any[]) {
   try {
@@ -32,78 +33,69 @@ export class BotActionsService {
     private readonly userService: UserService,
   ) {}
 
+  async handleBotEventError(event: string, err: any, ctx) {
+    console.error(`${event}: `, err.message);
+
+    if (err.code === 403) {
+      // код ошибки для "заблокированного пользователя"
+      const userId = ctx?.from?.id.toString();
+      if (userId) {
+        try {
+          await this.userService.blockUser(userId);
+        } catch (err) {
+          console.error(err.message);
+        }
+      }
+    }
+  }
+
   init(): void {
     this.bot = new Telegraf(process.env.BOT_TOKEN);
 
-    this.bot.catch((err) => {
-      console.error('bot error: ', err);
+    this.bot.catch(async (err, ctx) => {
+      await this.handleBotEventError('bot error', err, ctx);
     });
 
     this.bot
-      .start(async (ctx) => {
-        try {
-          await safeExecute(this.onBotStart.bind(this), ctx);
-        } catch (e) {
-          console.error(e);
-        }
-      })
-      .catch((err) => {
-        console.error('bot error: ', err);
+      .start((ctx) => safeExecute(this.onBotStart.bind(this), ctx))
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('start error: ', err, ctx);
       });
     this.bot
-      .hears('/restart', async (ctx) => {
-        try {
-          await safeExecute(this.onBotRestart.bind(this), ctx);
-        } catch (e) {
-          console.error(e);
-        }
-      })
-      .catch((err) => {
-        console.error('bot error: ', err);
+      .hears('/restart', (ctx) =>
+        safeExecute(this.onBotRestart.bind(this), ctx),
+      )
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('restart error: ', err, ctx);
       });
     this.bot
-      .hears('/find', async (ctx) => {
-        try {
-          await safeExecute(this.onFindPartner.bind(this), ctx);
-        } catch (e) {
-          console.error(e);
-        }
-      })
-      .catch((err) => {
-        console.error('bot error: ', err);
+      .hears('/find', (ctx) => safeExecute(this.onFindPartner.bind(this), ctx))
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('find error: ', err, ctx);
       });
     this.bot
-      .hears('/stop', async (ctx) => {
-        try {
-          await safeExecute(this.onStopSearch.bind(this), ctx);
-        } catch (e) {
-          console.error(e);
-        }
-      })
+      .hears('/stop', (ctx) => safeExecute(this.onStopSearch.bind(this), ctx))
       .catch((err) => {
-        console.error('bot error: ', err);
+        console.error('stop error: ', err);
       });
     this.bot
-      .hears('/change', async (ctx) => {
-        try {
-          await safeExecute(this.onChangePartner.bind(this), ctx);
-        } catch (e) {
-          console.error(e);
-        }
-      })
-      .catch((err) => {
-        console.error('bot error: ', err);
+      .hears('/change', (ctx) =>
+        safeExecute(this.onChangePartner.bind(this), ctx),
+      )
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('change error: ', err, ctx);
       });
     this.bot
-      .hears('/end', async (ctx) => {
-        try {
-          await safeExecute(this.onEndChat.bind(this), ctx);
-        } catch (e) {
-          console.error(e);
-        }
-      })
-      .catch((err) => {
-        console.error('bot error: ', err);
+      .hears('/end', (ctx) => safeExecute(this.onEndChat.bind(this), ctx))
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('end error: ', err, ctx);
+      });
+    this.bot
+      .hears('/showNotification', (ctx) =>
+        safeExecute(this.onShowNotification.bind(this), ctx),
+      )
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('end error: ', err, ctx);
       });
     this.bot
       .on('message', async (ctx) => {
@@ -120,57 +112,48 @@ export class BotActionsService {
           return;
         }
       })
-      .catch((err) => {
-        console.error('bot error: ', err);
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('message error: ', err, ctx);
       });
 
     this.bot
-      .action('find_partner', async (ctx) => {
-        try {
-          await safeExecute(this.onFindPartner.bind(this), ctx);
-        } catch (e) {
-          console.error(e);
-        }
-      })
-      .catch((err) => {
-        console.error('bot error: ', err);
+      .action('find_partner', (ctx) =>
+        safeExecute(this.onFindPartner.bind(this), ctx),
+      )
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('find_partner error: ', err, ctx);
       });
     this.bot
-      .action('stop_search', async (ctx) => {
-        try {
-          await safeExecute(this.onStopSearch.bind(this), ctx);
-        } catch (e) {
-          console.error(e);
-        }
-      })
-      .catch((err) => {
-        console.error('bot error: ', err);
+      .action('stop_search', (ctx) =>
+        safeExecute(this.onStopSearch.bind(this), ctx),
+      )
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('stop_search: ', err, ctx);
       });
     this.bot
-      .action('change_partner', async (ctx) => {
-        try {
-          await safeExecute(this.onChangePartner.bind(this), ctx);
-        } catch (e) {
-          console.error(e);
-        }
-      })
-      .catch((err) => {
-        console.error('bot error: ', err);
+      .action('change_partner', (ctx) =>
+        safeExecute(this.onChangePartner.bind(this), ctx),
+      )
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('change_partner: ', err, ctx);
       });
     this.bot
-      .action('end_chat', async (ctx) => {
-        try {
-          await safeExecute(this.onEndChat.bind(this), ctx);
-        } catch (e) {
-          console.error(e);
-        }
-      })
-      .catch((err) => {
-        console.error('bot error: ', err);
+      .action('end_chat', async (ctx) =>
+        safeExecute(this.onEndChat.bind(this), ctx),
+      )
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('end_chat error: ', err, ctx);
+      });
+    this.bot
+      .action('hide_notification', async (ctx) =>
+        safeExecute(this.onHideNotification.bind(this), ctx),
+      )
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('hide_notification error: ', err, ctx);
       });
 
     this.bot.launch().catch((err) => {
-      console.error('bot error: ', err);
+      console.error('launch error: ', err);
     });
   }
 
@@ -181,17 +164,38 @@ export class BotActionsService {
         this.i18n.t('events.welcome', { lang: this.lang }),
         this.getFindPartnerKeyboard(),
       )
-      .catch((err) => console.log(err));
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('events.welcome: ', err, ctx);
+      });
   }
 
   async onBotRestart(ctx): Promise<void> {
     await this.onEndChat(ctx, false);
-    ctx
+    await ctx
       .reply(
         this.i18n.t('events.botRestarted', { lang: this.lang }),
         this.getFindPartnerKeyboard(),
       )
-      .catch((err) => console.log(err));
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('events.botRestarted: ', err, ctx);
+      });
+  }
+
+  async onHideNotification(ctx): Promise<void> {
+    await this.onEndChat(ctx, false);
+    await ctx
+      .reply(
+        this.i18n.t('events.searchPartner', { lang: this.lang }),
+        this.getFindPartnerKeyboard(),
+      )
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('events.searchPartner: ', err, ctx);
+      });
+    await this.toggleNotification(ctx, false);
+  }
+
+  async onShowNotification(ctx): Promise<void> {
+    await this.toggleNotification(ctx, true);
   }
 
   async onFindPartner(ctx): Promise<void> {
@@ -201,28 +205,42 @@ export class BotActionsService {
         this.i18n.t('events.searchPartner', { lang: this.lang }),
         this.getStopSearchKeyboard(),
       )
-      .catch((err) => console.log(err));
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('events.searchPartner: ', err, ctx);
+      });
     await this.findPartner(ctx);
   }
 
   async onStopSearch(ctx): Promise<void> {
     await this.onEndChat(ctx, false);
-    ctx
+    await ctx
       .reply(
         this.i18n.t('events.stopPartnerSearch', { lang: this.lang }),
         this.getFindPartnerKeyboard(),
       )
-      .catch((err) => console.log(err));
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('events.stopPartnerSearch: ', err, ctx);
+      });
     await this.stopSearch(ctx);
   }
 
-  getFindPartnerKeyboard(): any {
-    return Markup.inlineKeyboard([
+  getFindPartnerKeyboard(hideNotificationButton = false): any {
+    const buttons = [
       Markup.button.callback(
         this.i18n.t('events.findPartner', { lang: this.lang }),
         'find_partner',
       ),
-    ]);
+    ];
+
+    if (hideNotificationButton) {
+      buttons.push(
+        Markup.button.callback(
+          this.i18n.t('events.hideNotification', { lang: this.lang }),
+          'hide_notification',
+        ),
+      );
+    }
+    return Markup.inlineKeyboard(buttons);
   }
 
   getStopSearchKeyboard(): any {
@@ -238,12 +256,12 @@ export class BotActionsService {
     const userId = ctx.from.id.toString();
     let room = this.roomsService.findSingleUserRoom(
       userId,
-      this.userService.getPastPartners(userId),
+      await this.userService.getPastPartners(userId),
     );
 
     if (room) {
       room = this.roomsService.addUserToRoom(userId, room);
-      this.userService.setActiveRoom(userId, room.id);
+      await this.userService.setActiveRoom(userId, room.id);
 
       // Клавиатура с двумя кнопками
       const partnerChatKeyboard = Markup.inlineKeyboard([
@@ -257,19 +275,25 @@ export class BotActionsService {
         ),
       ]);
 
-      ctx
+      await ctx
         .reply(
           this.i18n.t('events.connectedWithPartner', { lang: this.lang }),
           partnerChatKeyboard,
         )
-        .catch((err) => console.log(err));
+        .catch(async (err, ctx) => {
+          await this.handleBotEventError(
+            'events.connectedWithPartner: ',
+            err,
+            ctx,
+          );
+        });
 
       const partnerId = room.users.find((u) => u !== userId);
-      this.userService.setActiveRoom(partnerId, room.id);
-      this.userService.setCurrentPartner(userId, partnerId);
-      this.userService.setCurrentPartner(partnerId, userId);
+      await this.userService.setActiveRoom(partnerId, room.id);
+      await this.userService.setCurrentPartner(userId, partnerId);
+      await this.userService.setCurrentPartner(partnerId, userId);
 
-      this.bot.telegram
+      await this.bot.telegram
         .sendMessage(
           partnerId,
           this.i18n.t('events.connectedWithPartner', { lang: this.lang }),
@@ -277,18 +301,18 @@ export class BotActionsService {
         )
         .then()
         .catch((error) => {
-          console.error('An error:', error);
+          console.error('An error:', error.message);
           ctx
             .reply(
               `Кажется, что-то пошло не так...\nПо вопросам работы сервиса пиши в чат @govirtchat`,
               this.getFindPartnerKeyboard(),
             )
-            .catch((err) => console.log(err));
+            .catch((err) => console.log(err.message));
         });
     } else {
       room = this.roomsService.createRoom(userId);
-      this.userService.setActiveRoom(userId, room.id);
-      this.notificationOtherUsers(userId);
+      await this.userService.setActiveRoom(userId, room.id);
+      await this.notificationOtherUsers(userId);
     }
   }
 
@@ -299,12 +323,12 @@ export class BotActionsService {
     if (room && room.active) {
       const partnerId = room.users.find((u) => u !== userId);
       if (partnerId) {
-        this.userService.setCurrentPartner(partnerId, null);
-        this.userService.addPastPartner(userId, partnerId);
-        this.userService.addPastPartner(partnerId, userId);
-        this.userService.setActiveRoom(partnerId, null);
-        this.roomsService.deactivateRoom(room);
-        this.bot.telegram
+        await this.userService.setCurrentPartner(partnerId, null);
+        await this.userService.addPastPartner(userId, partnerId);
+        await this.userService.addPastPartner(partnerId, userId);
+        await this.userService.setActiveRoom(partnerId, null);
+        await this.roomsService.deactivateRoom(room);
+        await this.bot.telegram
           .sendMessage(
             partnerId,
             this.i18n.t('events.chatEnded', { lang: this.lang }),
@@ -312,7 +336,7 @@ export class BotActionsService {
           )
           .then()
           .catch((error) => {
-            console.error('An error:', error);
+            console.error('An error:', error.message);
             ctx.reply(
               `Кажется, что-то пошло не так...\nПо вопросам работы сервиса пиши в чат @govirtchat`,
               this.getFindPartnerKeyboard(),
@@ -321,16 +345,25 @@ export class BotActionsService {
       }
     }
 
-    this.userService.setCurrentPartner(userId, null);
-    this.userService.setActiveRoom(userId, null);
+    await this.userService.setCurrentPartner(userId, null);
+    await this.userService.setActiveRoom(userId, null);
     if (showKeyboard) {
       ctx
         .reply(
           this.i18n.t('events.chatEnded', { lang: this.lang }),
           this.getFindPartnerKeyboard(),
         )
-        .catch((err) => console.log(err));
+        .catch(async (err, ctx) => {
+          await this.handleBotEventError('events.chatEnded: ', err, ctx);
+        });
     }
+  }
+
+  // false - скрываем
+  // true - показываем снова
+  async toggleNotification(ctx, flag: boolean) {
+    const userId = ctx.from.id.toString();
+    await this.userService.toggleNotification(userId, flag);
   }
 
   async stopSearch(ctx): Promise<void> {
@@ -347,46 +380,52 @@ export class BotActionsService {
 
   async notificationOtherUsers(userId: string) {
     // Защита от флуда
-    const TEN_MINUTES = 10 * 60 * 1000; // 10 минут в миллисекундах
-    const lastSearchTimestamp = this.userService.getLastSearchTimestamp(userId);
+    const TEN_MINUTES = 30 * 60 * 1000;
+    const lastSearchTimestamp =
+      await this.userService.getLastSearchTimestamp(userId);
     const timeSinceLastSearch = Date.now() - lastSearchTimestamp;
     if (lastSearchTimestamp && timeSinceLastSearch <= TEN_MINUTES) {
       return;
     }
 
-    this.userService.setLastSearchTimestamp(userId);
+    await this.userService.setLastSearchTimestamp(userId);
     // Получаем всех пользователей, которые не в комнате и не в чате
-    const usersWithoutRoom = Object.keys(this.userService.users).filter(
-      (partnerId) =>
-        !this.userService.getActiveRoom(partnerId) &&
-        !this.userService.getCurrentPartner(partnerId) &&
-        // Добавляем проверку, что userId не в pastPartners
-        !this.userService.getPastPartners(partnerId).includes(userId),
-    );
+    const usersWithoutRoom = await this.userService.usersWithoutRoom(userId);
 
-    const THIRTY_MINUTES = 30 * 60 * 1000; // 30 минут в миллисекундах
-    usersWithoutRoom.forEach((userId) => {
+    const THIRTY_MINUTES = 60 * 60 * 1000;
+    for (const userId of usersWithoutRoom) {
       const lastNotificationTimestamp =
-        this.userService.getLastNotificationTimestamp(userId);
+        await this.userService.getLastNotificationTimestamp(userId);
       const timeSinceLastNotification = Date.now() - lastNotificationTimestamp;
       if (
         lastNotificationTimestamp &&
         timeSinceLastNotification <= THIRTY_MINUTES
       ) {
-        return;
+        continue;
       }
 
-      this.userService.setLastNotificationTimestamp(userId);
+      await this.userService.setLastNotificationTimestamp(userId);
 
-      this.bot.telegram
+      await this.bot.telegram
         .sendMessage(
           userId,
           'Кто-то начал поиск. Начинай скорее поиск, чтобы присоединиться! 👇',
-          this.getFindPartnerKeyboard(),
+          this.getFindPartnerKeyboard(true),
         )
-        .catch((error) => {
-          console.error('Failed to send message:', error);
+        .catch(async (err) => {
+          console.error(`notification error`, err.message);
+
+          if (err.code === 403) {
+            // код ошибки для "заблокированного пользователя"
+            if (userId) {
+              try {
+                await this.userService.blockUser(userId);
+              } catch (err) {
+                console.error(err.message);
+              }
+            }
+          }
         });
-    });
+    }
   }
 }
