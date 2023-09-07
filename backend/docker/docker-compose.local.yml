@@ -1,0 +1,64 @@
+version: '3.9'
+
+
+services:
+  go_to_virt_db:
+    image: postgres:15.4-bullseye
+    restart: always
+    environment:
+      - POSTGRES_USER=go_to_virt
+      - POSTGRES_DB=go_to_virt
+      - POSTGRES_PASSWORD=go_to_virt
+    container_name: go_to_virt_db
+    volumes:
+      - go_to_virt_db:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: pg_isready -U go_to_virt -d go_to_virt
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - go_to_virt
+
+
+  go_to_virt_installer:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+      target: go_to_vrit_app
+    container_name: go_to_virt_installer
+    command: "npm i"
+    volumes:
+      - '../.:/app'
+
+
+  go_to_virt_app:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+      target: go_to_vrit_app
+    container_name: go_to_virt_app
+    depends_on:
+      go_to_virt_db:
+        condition: service_healthy
+      go_to_virt_installer:
+        condition: service_completed_successfully
+    networks:
+      - go_to_virt
+    ports:
+      - "3000:3000"
+    volumes:
+      - '../.:/app'
+    command: npm run start:dev
+
+
+volumes:
+  go_to_virt_db:
+    name: go_to_virt_db
+
+
+networks:
+  go_to_virt:
+    name: go_to_virt
