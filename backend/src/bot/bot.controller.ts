@@ -10,17 +10,17 @@ export class BotController {
   ) {}
 
   @Get()
-  getHello(): string {
+  async getHello(): Promise<string> {
     const statistic = `
       Активных комнат (всего, даже активная комната с 1 человеком): ${this.roomsService.getActiveRoomsCount()}<br>
       Активных комнат с 2 людьми: ${this.roomsService.getActiveRoomsCount(
         true,
       )}<br>
-      Всего пользователей: ${this.userService.countUsers('all')}<br>
-      Всего пользователей, которые сейчас ищут комнату: ${this.userService.countUsers(
+      Всего пользователей: ${await this.userService.countUsers('all')}<br>
+      Всего пользователей, которые сейчас ищут комнату: ${await this.userService.countUsers(
         'activeRoom',
       )}<br>
-      Всего пользователей, которые сейчас в чате: ${this.userService.countUsers(
+      Всего пользователей, которые сейчас в чате: ${await this.userService.countUsers(
         'currentPartner',
       )}<br>
     `;
