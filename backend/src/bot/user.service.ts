@@ -192,7 +192,7 @@ export class UserService {
   }
 
   async usersWithoutRoom(userId: string): Promise<string[]> {
-    const THIRTY_MINUTES = 10 * 1000;
+    const THIRTY_MINUTES = 30 * 60 * 1000;
     const thirtyMinutesAgo = Date.now() - THIRTY_MINUTES;
     const availablePartners = await this.userRepository
       .createQueryBuilder('user')
