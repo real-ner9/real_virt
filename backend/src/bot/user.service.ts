@@ -312,4 +312,13 @@ export class UserService {
 
     return user.dislikes || [];
   }
+
+  async getAllActiveUsers(): Promise<User[]> {
+    return this.userRepository.find({
+      where: {
+        isBlocked: false,
+        enableNotification: true,
+      },
+    });
+  }
 }

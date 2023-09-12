@@ -6,6 +6,7 @@ import { MessageService } from './message.service';
 import { RoomsService } from './room.service';
 import { UserService } from './user.service';
 import * as process from 'process';
+import * as cron from 'node-cron';
 
 async function safeExecute(fn: Function, ctx, ...args: any[]) {
   try {
@@ -51,6 +52,7 @@ export class BotActionsService {
   }
 
   init(): void {
+    process.env.TZ = 'Europe/Moscow';
     process.on('unhandledRejection', (reason) => {
       console.error('Unhandled Promise Rejection:', reason);
     });
@@ -60,6 +62,37 @@ export class BotActionsService {
     });
 
     this.bot = new Telegraf(process.env.BOT_TOKEN);
+
+    cron.schedule(
+      '0 0 21 * * *',
+      async () => {
+        // 1. Получите всех активных пользователей
+        const activeUsers = await this.userService.getAllActiveUsers();
+
+        // 2. Отправьте сообщение каждому пользователю с задержкой
+        for (let i = 0; i < activeUsers.length; i++) {
+          setTimeout(async () => {
+            const user = activeUsers[i];
+            try {
+              await this.bot.telegram
+                .sendMessage(
+                  user.userId,
+                  '🌆 Вечер наступил, и мы так заждались тебя! Самое время завести интересный разговор в нашем чате. 🥳🌟',
+                  this.getFindPartnerKeyboard(),
+                )
+                .catch((e) =>
+                  console.error('cron schedule catch test error ', e.message),
+                );
+            } catch (e) {
+              console.error('cron schedule error:', e.message);
+            }
+          }, i * 500);
+        }
+      },
+      {
+        timezone: 'Europe/Moscow',
+      },
+    );
 
     this.bot.catch(async (err, ctx) => {
       await this.handleBotEventError('bot error', err, ctx);
