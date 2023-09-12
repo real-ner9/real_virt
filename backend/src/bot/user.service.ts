@@ -318,6 +318,8 @@ export class UserService {
       where: {
         isBlocked: false,
         enableNotification: true,
+        activeRoom: null,
+        currentPartner: null,
       },
     });
   }
