@@ -73,19 +73,15 @@ export class BotActionsService {
         for (let i = 0; i < activeUsers.length; i++) {
           setTimeout(async () => {
             const user = activeUsers[i];
-            try {
-              await this.bot.telegram
-                .sendMessage(
-                  user.userId,
-                  '🌆 Вечер наступил, и мы так заждались тебя! Самое время завести интересный разговор в нашем чате. 🥳🌟',
-                  this.getFindPartnerKeyboard(),
-                )
-                .catch((e) =>
-                  console.error('cron schedule catch test error ', e.message),
-                );
-            } catch (e) {
-              console.error('cron schedule error:', e.message);
-            }
+            await this.bot.telegram
+              .sendMessage(
+                user.userId,
+                '🌆 Вечер наступил, и мы так заждались тебя! Самое время завести интересный разговор в нашем чате. 🥳🌟',
+                this.getFindPartnerKeyboard(),
+              )
+              .catch((e) =>
+                console.error('cron schedule catch test error ', e.message),
+              );
           }, i * 500);
         }
       },
