@@ -270,7 +270,7 @@ export class BotActionsService {
       await this.userService.addDislike(userId, partnerId);
       const isChangePartner = event === 'change_partner' || event === '/change';
       await this.onEndChat(ctx, !isChangePartner);
-      isChangePartner && (await this.findPartner(ctx));
+      isChangePartner && (await this.onFindPartner(ctx));
     } catch (e) {
       console.error('onPositiveFeedback error', e.message);
     }
@@ -477,8 +477,6 @@ export class BotActionsService {
       const currentPartner = await this.userService.getCurrentPartner(userId);
       if (!currentPartner) return;
       const match = ctx.match && ctx.match[0];
-      console.log('match', match);
-      console.log('currentPartner', currentPartner);
       const feedbackKeyboard = Markup.inlineKeyboard([
         Markup.button.callback(
           '👍',
