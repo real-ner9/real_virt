@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Markup, Telegraf } from 'telegraf';
 import { UserService } from '../bot-users/user.service';
+import { UserState } from '../bot-users/types/user-state';
 
 async function safeExecute(fn: Function, ctx, ...args: any[]) {
   try {
@@ -71,6 +72,7 @@ export class ProfileMatchActionsService {
 
       if (userName && profileIsVisible) {
         console.log('browsing');
+        await this.userService.setState(userId, UserState.BROWSING_PROFILES);
         return;
       }
 

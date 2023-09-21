@@ -158,6 +158,7 @@ export class UserActionsService {
         return await this.onCreateProfile(ctx);
       }
 
+      await this.userService.setState(userId, UserState.PROFILE);
       // Отправляем фотографию пользователю с использованием file_id и добавляем подпись
       const captionText = `${user.name}\n${user.age}\n${
         UserRoleMap[user.role]

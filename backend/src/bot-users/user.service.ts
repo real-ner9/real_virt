@@ -88,6 +88,7 @@ export class UserService {
       user = new User(userId);
       user.pastPartners = [];
     }
+    user.state = UserState.QUICK_SEARCH;
     user.activeRoom = roomId;
     await this.userRepository.save(user);
     this.userCache[userId] = user; // Update the cache

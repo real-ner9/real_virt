@@ -31,4 +31,12 @@ export enum UserState {
    * Смотрит анкеты
    */
   BROWSING_PROFILES = 'BROWSING_PROFILES',
+  /**
+   * Смотрит лайки
+   */
+  BROWSING_LIKES = 'BROWSING_LIKES',
+  /**
+   * Смотрит мэтчи
+   */
+  BROWSING_MATCHES = 'BROWSING_MATCHES',
 }
