@@ -29,6 +29,10 @@ export class ProfileMatchActionsService {
   placeholderImageUrl =
     'AgACAgIAAxkBAAEGVmVlDYRn7xEuIKXedWtKRwABalzIReoAApfMMRv6e2lI7c3KWa4Izr0BAAMCAANzAAMwBA';
 
+  // for dev
+  // placeholderImageUrl =
+  //   'AgACAgIAAxkBAAIGpWUMQzDOvVx0H2hS1u202IxgA-MIAALzzDEbnLZhSPp9IdN8EPI3AQADAgADcwADMAQ';
+
   constructor(private readonly userService: UserService) {}
 
   init(bot: Telegraf) {
@@ -482,10 +486,16 @@ export class ProfileMatchActionsService {
     }
   }
 
+  escapeMarkdown(text: string): string {
+    return text.replace(/\./g, '\\.');
+  }
+
   getCaptionText(user): string {
-    return `${user.name}\n${user.age}\n${UserRoleMap[user.role]}\n${
-      user.description
-    }`;
+    return `${this.escapeMarkdown(user.name)}\n${this.escapeMarkdown(
+      String(user.age),
+    )}\n${this.escapeMarkdown(UserRoleMap[user.role])}\n${this.escapeMarkdown(
+      user.description,
+    )}`;
   }
 
   getUserId(ctx): string {
