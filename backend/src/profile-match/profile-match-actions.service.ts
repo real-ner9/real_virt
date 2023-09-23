@@ -486,16 +486,17 @@ export class ProfileMatchActionsService {
     }
   }
 
-  escapeMarkdown(text: string): string {
-    return text.replace(/\./g, '\\.');
-  }
-
   getCaptionText(user): string {
-    return `${this.escapeMarkdown(user.name)}\n${this.escapeMarkdown(
-      String(user.age),
-    )}\n${this.escapeMarkdown(UserRoleMap[user.role])}\n${this.escapeMarkdown(
-      user.description,
-    )}`;
+    return (
+      '' +
+      user.name +
+      '\n' +
+      user.age +
+      '\n' +
+      UserRoleMap[user.role] +
+      '\n' +
+      user.description
+    );
   }
 
   getUserId(ctx): string {
