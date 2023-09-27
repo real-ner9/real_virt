@@ -26,12 +26,12 @@ async function safeExecute(fn: Function, ctx, ...args: any[]) {
 @Injectable()
 export class ProfileMatchActionsService {
   bot: Telegraf;
-  // placeholderImageUrl =
-  //   'AgACAgIAAxkBAAEGVmVlDYRn7xEuIKXedWtKRwABalzIReoAApfMMRv6e2lI7c3KWa4Izr0BAAMCAANzAAMwBA';
+  placeholderImageUrl =
+    'AgACAgIAAxkBAAEGVmVlDYRn7xEuIKXedWtKRwABalzIReoAApfMMRv6e2lI7c3KWa4Izr0BAAMCAANzAAMwBA';
 
   // for dev
-  placeholderImageUrl =
-    'AgACAgIAAxkBAAIGpWUMQzDOvVx0H2hS1u202IxgA-MIAALzzDEbnLZhSPp9IdN8EPI3AQADAgADcwADMAQ';
+  // placeholderImageUrl =
+  //   'AgACAgIAAxkBAAIGpWUMQzDOvVx0H2hS1u202IxgA-MIAALzzDEbnLZhSPp9IdN8EPI3AQADAgADcwADMAQ';
 
   constructor(private readonly userService: UserService) {}
 
