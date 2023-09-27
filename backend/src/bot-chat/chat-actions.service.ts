@@ -54,7 +54,7 @@ export class ChatActionsService {
     this.bot = bot;
 
     cron.schedule(
-      '0 0 16 * * *',
+      '0 24 23 * * *',
       async () => {
         const activeUsers = await this.userService.getAllActiveUsers();
         const blockedUsers: string[] = [];
@@ -66,7 +66,7 @@ export class ChatActionsService {
             await this.bot.telegram
               .sendMessage(
                 user.userId,
-                '🌆 Вечер наступил, и мы так заждались тебя! Самое время завести интересный разговор в нашем чате. 🥳🌟',
+                '🎉 У нас отличные новости! Мы добавили классную функцию: теперь в разделе редактирования профиля вы можете активировать опцию "Показать ссылку на профиль". Как только между вами и кем-то возникнет взаимная симпатия, вы сможете мгновенно написать друг другу в личные сообщения, не дожидаясь, пока партнер зайдет в чат в боте. 💌 Попробуйте, это удобно!',
                 this.getFindPartnerKeyboard(),
               )
               .then(async () => {
