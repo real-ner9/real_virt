@@ -106,6 +106,18 @@ export class UserActionsService {
           ctx,
         );
       });
+
+    this.bot
+      .action('toggle_username_visible', async (ctx) =>
+        safeExecute(this.onToggleUserNameVisible.bind(this), ctx),
+      )
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError(
+          'toggle_username_visible error: ',
+          err,
+          ctx,
+        );
+      });
   }
 
   async handleBotEventError(event: string, err: any, ctx) {
@@ -132,7 +144,24 @@ export class UserActionsService {
       await this.userService.setProfileVisible(userId, !isVisible);
       await this.onEditProfile(ctx);
     } catch (e) {
-      console.error('withoutPhoto error: ', e.message);
+      console.error('onToggleProfileVisible error: ', e.message);
+    }
+  }
+
+  async onToggleUserNameVisible(ctx) {
+    const userId = this.getUserId(ctx);
+    const telegramUsername = ctx.from?.username || null;
+    try {
+      const isVisible = await this.userService.getUsernameVisible(userId);
+
+      await this.userService.setUsernameVisible(
+        userId,
+        !isVisible,
+        telegramUsername,
+      );
+      await this.onEditProfile(ctx);
+    } catch (e) {
+      console.error('onToggleUserNameVisible error: ', e.message);
     }
   }
 
@@ -169,6 +198,14 @@ export class UserActionsService {
         [Markup.button.callback('Редактировать роль', 'edit_role')],
         [Markup.button.callback('Редактировать описание', 'edit_description')],
         [Markup.button.callback('Редактировать фото', 'edit_photo')],
+        [
+          Markup.button.callback(
+            user.showUsername
+              ? 'Убрать ссылку на профиль'
+              : 'Показывать ссылку на профиль',
+            'toggle_username_visible',
+          ),
+        ],
         [
           Markup.button.callback(
             user.isVisibleToOthers ? 'Скрыть профиль' : 'Открыть профиль',
@@ -240,6 +277,7 @@ export class UserActionsService {
 
   async feelName(ctx, userId: string) {
     const content = ctx.message?.text?.trim();
+    const telegramUsername = ctx.from?.username || null;
 
     if (!content.length || content.length > 40) {
       await ctx
@@ -251,7 +289,7 @@ export class UserActionsService {
     }
 
     try {
-      await this.userService.setName(userId, content);
+      await this.userService.setName(userId, content, telegramUsername);
       const age = await this.userService.getAge(userId);
       age ? await this.onEditProfile(ctx) : await this.onEditAge(ctx);
     } catch (e) {

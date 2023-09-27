@@ -26,12 +26,12 @@ async function safeExecute(fn: Function, ctx, ...args: any[]) {
 @Injectable()
 export class ProfileMatchActionsService {
   bot: Telegraf;
-  placeholderImageUrl =
-    'AgACAgIAAxkBAAEGVmVlDYRn7xEuIKXedWtKRwABalzIReoAApfMMRv6e2lI7c3KWa4Izr0BAAMCAANzAAMwBA';
+  // placeholderImageUrl =
+  //   'AgACAgIAAxkBAAEGVmVlDYRn7xEuIKXedWtKRwABalzIReoAApfMMRv6e2lI7c3KWa4Izr0BAAMCAANzAAMwBA';
 
   // for dev
-  // placeholderImageUrl =
-  //   'AgACAgIAAxkBAAIGpWUMQzDOvVx0H2hS1u202IxgA-MIAALzzDEbnLZhSPp9IdN8EPI3AQADAgADcwADMAQ';
+  placeholderImageUrl =
+    'AgACAgIAAxkBAAIGpWUMQzDOvVx0H2hS1u202IxgA-MIAALzzDEbnLZhSPp9IdN8EPI3AQADAgADcwADMAQ';
 
   constructor(private readonly userService: UserService) {}
 
@@ -72,7 +72,7 @@ export class ProfileMatchActionsService {
         safeExecute(this.onBrowsingLikes.bind(this), ctx),
       )
       .catch(async (err, ctx) => {
-        await this.handleBotEventError('open_profile error: ', err, ctx);
+        await this.handleBotEventError('browsing_likes error: ', err, ctx);
       });
     this.bot
       .action(/browsing_matches\?offset=([^&]+)/, async (ctx) =>
@@ -81,7 +81,7 @@ export class ProfileMatchActionsService {
         }),
       )
       .catch(async (err, ctx) => {
-        await this.handleBotEventError('open_profile error: ', err, ctx);
+        await this.handleBotEventError('browsing_matches error: ', err, ctx);
       });
 
     this.bot
@@ -91,7 +91,7 @@ export class ProfileMatchActionsService {
         }),
       )
       .catch(async (err, ctx) => {
-        await this.handleBotEventError('open_profile error: ', err, ctx);
+        await this.handleBotEventError('dislike error: ', err, ctx);
       });
 
     this.bot
@@ -101,7 +101,7 @@ export class ProfileMatchActionsService {
         }),
       )
       .catch(async (err, ctx) => {
-        await this.handleBotEventError('open_profile error: ', err, ctx);
+        await this.handleBotEventError('like error: ', err, ctx);
       });
 
     this.bot
@@ -111,7 +111,7 @@ export class ProfileMatchActionsService {
         }),
       )
       .catch(async (err, ctx) => {
-        await this.handleBotEventError('open_profile error: ', err, ctx);
+        await this.handleBotEventError('start_chat error: ', err, ctx);
       });
 
     this.bot
@@ -121,7 +121,7 @@ export class ProfileMatchActionsService {
         }),
       )
       .catch(async (err, ctx) => {
-        await this.handleBotEventError('open_profile error: ', err, ctx);
+        await this.handleBotEventError('blocked error: ', err, ctx);
       });
   }
 
@@ -232,7 +232,10 @@ export class ProfileMatchActionsService {
       }
 
       if (user) {
-        captionText = this.getCaptionText(user);
+        captionText = this.getCaptionText(
+          user,
+          userState === UserState.BROWSING_MATCHES && user.showUsername,
+        );
 
         if (userState === UserState.BROWSING_MATCHES) {
           keyboard = [
@@ -316,6 +319,27 @@ export class ProfileMatchActionsService {
     try {
       await this.userService.addLike(userId, partnerId);
       await this.browsingProfile(ctx);
+      const user = await this.userService.getUserFromCacheOrDB(userId);
+      const userImageUrlToSend = user?.photoUrl || this.placeholderImageUrl;
+      const partnerKeyboard = [
+        [Markup.button.callback('Смотреть лайки', `browsing_likes`)],
+      ];
+      await ctx.telegram
+        .sendPhoto(partnerId, userImageUrlToSend, {
+          reply_markup: Markup.inlineKeyboard(partnerKeyboard).reply_markup,
+          parse_mode: 'HTML',
+          caption: `Ты понравился\n${this.getCaptionText(
+            user,
+            user.showUsername,
+          )}`,
+        })
+        .catch(async (err) => {
+          await this.handleBotEventError(
+            'onEditProfile ctx error:  ',
+            err,
+            ctx,
+          );
+        });
     } catch (e) {
       console.error('like error: ', e.message);
     }
@@ -409,7 +433,11 @@ export class ProfileMatchActionsService {
       return await ctx.telegram
         .sendPhoto(partnerId, userImageUrlToSend, {
           reply_markup: Markup.inlineKeyboard(partnerKeyboard).reply_markup,
-          caption: `Тебя в чат пригласил\n${this.getCaptionText(user)}`,
+          parse_mode: 'HTML',
+          caption: `Тебя в чат пригласил\n${this.getCaptionText(
+            user,
+            user.showUsername,
+          )}`,
         })
         .catch(async (err) => {
           await this.handleBotEventError(
@@ -490,9 +518,13 @@ export class ProfileMatchActionsService {
     return str.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
   }
 
-  getCaptionText(user): string {
-    return `${user.name}\n${user.age}\n${UserRoleMap[user.role]}\n${
-      user.description
+  getCaptionText(user, showUsername = false): string {
+    return `${
+      showUsername && user.username
+        ? `<a href="https://t.me/${user.username}">${user.name}</a>`
+        : user.name || ''
+    }\n${user.age || ''}\n${UserRoleMap[user.role] || ''}\n${
+      user.description || ''
     }`;
   }
 

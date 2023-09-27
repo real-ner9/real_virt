@@ -74,6 +74,12 @@ export class User {
   @OneToMany(() => Match, (match) => match.user)
   matches: Match[];
 
+  @Column({ type: 'text', nullable: true })
+  username: string;
+
+  @Column({ default: false })
+  showUsername: boolean;
+
   constructor(userId: string) {
     this.userId = userId;
     this.isBlocked = false;
@@ -93,5 +99,7 @@ export class User {
     this.role = null;
     this.isVisibleToOthers = false;
     this.name = null;
+    this.username = null;
+    this.showUsername = false;
   }
 }

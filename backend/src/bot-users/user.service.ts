@@ -26,10 +26,6 @@ export class UserService {
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Dislike)
     private readonly dislikeRepository: Repository<Dislike>,
-    @InjectRepository(Match)
-    private readonly matchRepository: Repository<Match>,
-    @InjectRepository(UserLiked)
-    private readonly userLikedRepository: Repository<UserLiked>,
   ) {
     setInterval(async () => {
       this.invalidateCache();
@@ -416,7 +412,7 @@ export class UserService {
     return user?.name;
   }
 
-  async setName(userId: string, name: string) {
+  async setName(userId: string, name: string, username: string | null) {
     let user = await this.getUserFromCacheOrDB(userId);
 
     if (!user) {
@@ -424,6 +420,10 @@ export class UserService {
     }
 
     user.name = name;
+    user.username = username;
+    if (!user.age) {
+      user.showUsername = true;
+    }
 
     await this.userRepository.save(user);
     this.updateCache(user);
@@ -493,11 +493,33 @@ export class UserService {
     return user?.isVisibleToOthers;
   }
 
+  async getUsernameVisible(userId: string): Promise<boolean> {
+    const user = await this.getUserFromCacheOrDB(userId);
+
+    return user?.showUsername;
+  }
+
   async setProfileVisible(userId: string, isVisible: boolean) {
     const user = await this.getUserFromCacheOrDB(userId);
 
     if (user) {
       user.isVisibleToOthers = isVisible;
+
+      await this.userRepository.save(user);
+      this.updateCache(user);
+    }
+  }
+
+  async setUsernameVisible(
+    userId: string,
+    isVisible: boolean,
+    username: string | null,
+  ) {
+    const user = await this.getUserFromCacheOrDB(userId);
+
+    if (user) {
+      user.showUsername = isVisible;
+      user.username = username;
 
       await this.userRepository.save(user);
       this.updateCache(user);
