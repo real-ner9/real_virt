@@ -406,6 +406,7 @@ export class ProfileMatchActionsService {
       const user = await this.userService.getUserFromCacheOrDB(userId);
       const partner = await this.userService.getUserFromCacheOrDB(partnerId);
       const userImageUrlToSend = user?.photoUrl || this.placeholderImageUrl;
+      const partnerImageUrlToSend = partner?.photoUrl || this.placeholderImageUrl;
       const partnerKeyboard = [
         [
           Markup.button.callback(
@@ -425,7 +426,7 @@ export class ProfileMatchActionsService {
         [Markup.button.callback('Главное меню', 'main_menu')],
       ];
       await ctx.telegram
-        .sendPhoto(userId, userImageUrlToSend, {
+        .sendPhoto(userId, partnerImageUrlToSend, {
           reply_markup: Markup.inlineKeyboard(userKeyboard).reply_markup,
           parse_mode: 'HTML',
           caption: `У тебя мэтч с \n${this.getCaptionText(
