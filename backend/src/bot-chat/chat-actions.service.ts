@@ -75,10 +75,10 @@ export class ChatActionsService {
                 }
               })
               .catch(async (e) => {
-                if (!user.isBlocked) {
+                if (e.code === 403 && !user.isBlocked) {
                   blockedUsers.push(user.userId);
                 }
-                console.error('cron schedule catch test error ', e.message);
+                console.error('daily notification ', e.message);
               });
 
             if (i === activeUsers.length - 1) {
