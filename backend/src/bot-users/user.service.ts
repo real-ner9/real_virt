@@ -569,19 +569,19 @@ export class UserService {
       .leftJoin(
         Like,
         'likedMe',
-        'likedMe.user_id = user.userId AND likedMe.likedUserId = :userId',
+        '(likedMe.user_id = user.userId AND likedMe.likedUserId = :userId)',
         { userId },
       )
       .leftJoin(
         Like,
         'iLiked',
-        'iLiked.likedUserId = user.userId AND iLiked.user_id = :userId',
+        '(iLiked.user_id = :userId AND iLiked.likedUserId = user.userId)',
         { userId },
       )
       .leftJoinAndSelect(
         Dislike,
         'dislike',
-        'dislike.user_id = :userId AND dislike.dislikedUserId = user.userId',
+        '(dislike.user_id = :userId AND dislike.dislikedUserId = user.userId)',
         { userId },
       )
       .where('user.userId != :userId')
