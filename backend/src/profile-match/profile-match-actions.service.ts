@@ -85,7 +85,7 @@ export class ProfileMatchActionsService {
       });
 
     this.bot
-      .action(/dislike\?partnerId=([^&]+)/, async (ctx) =>
+      .action(/^dislike\?partnerId=([^&]+)/, async (ctx) =>
         safeExecute(this.dislike.bind(this), ctx, {
           partnerId: ctx.match[1],
         }),
@@ -95,8 +95,28 @@ export class ProfileMatchActionsService {
       });
 
     this.bot
-      .action(/like\?partnerId=([^&]+)/, async (ctx) =>
+      .action(/^like\?partnerId=([^&]+)/, async (ctx) =>
         safeExecute(this.like.bind(this), ctx, {
+          partnerId: ctx.match[1],
+        }),
+      )
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('like error: ', err, ctx);
+      });
+
+    this.bot
+      .action(/^outside_dislike\?partnerId=([^&]+)/, async (ctx) =>
+        safeExecute(this.outsideDislike.bind(this), ctx, {
+          partnerId: ctx.match[1],
+        }),
+      )
+      .catch(async (err, ctx) => {
+        await this.handleBotEventError('dislike error: ', err, ctx);
+      });
+
+    this.bot
+      .action(/^outside_like\?partnerId=([^&]+)/, async (ctx) =>
+        safeExecute(this.outsideLike.bind(this), ctx, {
           partnerId: ctx.match[1],
         }),
       )
@@ -320,18 +340,40 @@ export class ProfileMatchActionsService {
       await this.userService.addLike(userId, partnerId);
       await this.browsingProfile(ctx);
       const user = await this.userService.getUserFromCacheOrDB(userId);
+      const hasPartnerLikedUser = await this.userService.hasUserLikedPartner(
+        partnerId,
+        userId,
+      );
       const userImageUrlToSend = user?.photoUrl || this.placeholderImageUrl;
-      const partnerKeyboard = [
-        [Markup.button.callback('Смотреть лайки', `browsing_likes`)],
-      ];
+      const partnerKeyboard = hasPartnerLikedUser
+        ? [
+            [
+              Markup.button.callback(
+                'Перейти в чат',
+                `request_to_chat?partnerId=${user.userId}&offset=0`,
+              ),
+            ],
+            [Markup.button.callback('Главное меню', 'main_menu')],
+          ]
+        : [
+            [
+              Markup.button.callback(
+                '👍',
+                `outside_like?partnerId=${user.userId}`,
+              ),
+              Markup.button.callback(
+                '👎',
+                `outside_dislike?partnerId=${user.userId}`,
+              ),
+            ],
+          ];
       await ctx.telegram
         .sendPhoto(partnerId, userImageUrlToSend, {
           reply_markup: Markup.inlineKeyboard(partnerKeyboard).reply_markup,
           parse_mode: 'HTML',
-          caption: `Ты понравился\n${this.getCaptionText(
-            user,
-            user.showUsername,
-          )}`,
+          caption: `${
+            hasPartnerLikedUser ? 'У тебя мэтч с' : 'Ты понравился'
+          }\n${this.getCaptionText(user, user.showUsername)}`,
         })
         .catch(async (err) => {
           await this.handleBotEventError(
@@ -352,6 +394,84 @@ export class ProfileMatchActionsService {
       await this.userService.addDislike(userId, partnerId);
       await this.userService.addDislike(partnerId, userId);
       await this.browsingProfile(ctx);
+    } catch (e) {
+      console.error('dislike error: ', e.message);
+    }
+  }
+
+  async outsideLike(ctx, { partnerId }: { partnerId: string }) {
+    const userId = this.getUserId(ctx);
+    try {
+      await this.userService.addLike(userId, partnerId);
+      const user = await this.userService.getUserFromCacheOrDB(userId);
+      const partner = await this.userService.getUserFromCacheOrDB(partnerId);
+      const userImageUrlToSend = user?.photoUrl || this.placeholderImageUrl;
+      const partnerKeyboard = [
+        [
+          Markup.button.callback(
+            'Перейти в чат',
+            `request_to_chat?partnerId=${user.userId}&offset=0`,
+          ),
+        ],
+        [Markup.button.callback('Главное меню', 'main_menu')],
+      ];
+      const userKeyboard = [
+        [
+          Markup.button.callback(
+            'Перейти в чат',
+            `request_to_chat?partnerId=${partner.userId}&offset=0`,
+          ),
+        ],
+        [Markup.button.callback('Главное меню', 'main_menu')],
+      ];
+      await ctx.telegram
+        .sendPhoto(userId, userImageUrlToSend, {
+          reply_markup: Markup.inlineKeyboard(userKeyboard).reply_markup,
+          parse_mode: 'HTML',
+          caption: `У тебя мэтч с \n${this.getCaptionText(
+            partner,
+            partner.showUsername,
+          )}`,
+        })
+        .catch(async (err) => {
+          await this.handleBotEventError(
+            'onEditProfile ctx error:  ',
+            err,
+            ctx,
+          );
+        });
+      await ctx.telegram
+        .sendPhoto(partnerId, userImageUrlToSend, {
+          reply_markup: Markup.inlineKeyboard(partnerKeyboard).reply_markup,
+          parse_mode: 'HTML',
+          caption: `У тебя мэтч с \n${this.getCaptionText(
+            user,
+            user.showUsername,
+          )}`,
+        })
+        .catch(async (err) => {
+          await this.handleBotEventError(
+            'onEditProfile ctx error:  ',
+            err,
+            ctx,
+          );
+        });
+    } catch (e) {
+      console.error('like error: ', e.message);
+    }
+  }
+
+  async outsideDislike(ctx, { partnerId }: { partnerId: string }) {
+    const userId = this.getUserId(ctx);
+
+    try {
+      await this.userService.addDislike(userId, partnerId);
+      await this.userService.addDislike(partnerId, userId);
+      await ctx
+        .deleteMessage()
+        .catch((e) =>
+          console.error('user action delete message error: ', e.message),
+        );
     } catch (e) {
       console.error('dislike error: ', e.message);
     }

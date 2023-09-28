@@ -344,6 +344,28 @@ export class UserService {
     }
   }
 
+  async hasUserLikedPartner(
+    userId: string,
+    partnerId: string,
+  ): Promise<boolean> {
+    // Получаем пользователя с userId и его лайками
+    const user = await this.userRepository.findOne({
+      where: { userId },
+      relations: ['likes'],
+    });
+
+    // Если пользователь не найден, возвращаем false
+    if (!user) return false;
+
+    // Проверяем, есть ли в лайках partnerId
+    const existingLike = user.likes.find(
+      (like) => like.likedUserId === partnerId,
+    );
+
+    // Возвращаем true, если лайк найден, иначе false
+    return !!existingLike;
+  }
+
   async getDislikes(userId: string): Promise<string[]> {
     const user = await this.userRepository.findOne({
       where: { userId },
