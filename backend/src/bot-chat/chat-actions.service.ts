@@ -238,15 +238,15 @@ export class ChatActionsService {
   ) {
     try {
       const userId = ctx.from.id.toString();
+      await this.userService.addLike(userId, partnerId);
+      const isChangePartner = event === 'change_partner' || event === '/change';
+      await this.onEndChat(ctx, !isChangePartner);
+      isChangePartner && (await this.onFindPartner(ctx));
       await ctx
         .deleteMessage()
         .catch((e) =>
           console.error('onPositiveFeedback deleteMessage error: ', e.message),
         );
-      await this.userService.addLike(userId, partnerId);
-      const isChangePartner = event === 'change_partner' || event === '/change';
-      await this.onEndChat(ctx, !isChangePartner);
-      isChangePartner && (await this.onFindPartner(ctx));
     } catch (e) {
       console.error('onPositiveFeedback error', e.message);
     }
@@ -524,6 +524,8 @@ export class ChatActionsService {
 
     try {
       const partnerId = await this.userService.getCurrentPartner(userId);
+      await this.userService.setCurrentPartner(userId, null);
+      await this.userService.setActiveRoom(userId, null);
       if (partnerId) {
         await this.userService.setCurrentPartner(partnerId, null);
         await this.userService.addPastPartner(userId, partnerId);
@@ -549,15 +551,6 @@ export class ChatActionsService {
       console.error('onEndChat if partnerId error', e.message);
     }
 
-    try {
-      await this.userService.setCurrentPartner(userId, null);
-      await this.userService.setActiveRoom(userId, null);
-    } catch (e) {
-      console.error(
-        'onEndChat setCurrentPartner setActiveRoom error',
-        e.message,
-      );
-    }
     if (showKeyboard) {
       ctx
         .reply(
