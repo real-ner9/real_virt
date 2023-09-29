@@ -26,12 +26,12 @@ async function safeExecute(fn: Function, ctx, ...args: any[]) {
 @Injectable()
 export class ProfileMatchActionsService {
   bot: Telegraf;
-  placeholderImageUrl =
-    'AgACAgIAAxkBAAEGVmVlDYRn7xEuIKXedWtKRwABalzIReoAApfMMRv6e2lI7c3KWa4Izr0BAAMCAANzAAMwBA';
+  // placeholderImageUrl =
+  //   'AgACAgIAAxkBAAEGVmVlDYRn7xEuIKXedWtKRwABalzIReoAApfMMRv6e2lI7c3KWa4Izr0BAAMCAANzAAMwBA';
 
   // for dev
-  // placeholderImageUrl =
-  //   'AgACAgIAAxkBAAIGpWUMQzDOvVx0H2hS1u202IxgA-MIAALzzDEbnLZhSPp9IdN8EPI3AQADAgADcwADMAQ';
+  placeholderImageUrl =
+    'AgACAgIAAxkBAAIGpWUMQzDOvVx0H2hS1u202IxgA-MIAALzzDEbnLZhSPp9IdN8EPI3AQADAgADcwADMAQ';
 
   constructor(private readonly userService: UserService) {}
 
@@ -233,7 +233,7 @@ export class ProfileMatchActionsService {
       const userId = this.getUserId(ctx);
       let user: User;
       const userState = await this.userService.getUserState(userId);
-      let captionText = 'Пока подходящих профилей нет, попробуй чуть позже';
+      let captionText = 'Пока подходящих анкет нет, попробуй чуть позже';
       let keyboard = [];
 
       if (userState === UserState.BROWSING_LIKES) {
@@ -406,7 +406,8 @@ export class ProfileMatchActionsService {
       const user = await this.userService.getUserFromCacheOrDB(userId);
       const partner = await this.userService.getUserFromCacheOrDB(partnerId);
       const userImageUrlToSend = user?.photoUrl || this.placeholderImageUrl;
-      const partnerImageUrlToSend = partner?.photoUrl || this.placeholderImageUrl;
+      const partnerImageUrlToSend =
+        partner?.photoUrl || this.placeholderImageUrl;
       const partnerKeyboard = [
         [
           Markup.button.callback(
