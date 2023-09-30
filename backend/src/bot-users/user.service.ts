@@ -6,8 +6,6 @@ import { UserState } from './types/user-state';
 import { UserRole } from './types/user-role';
 import { Like } from './schemas/like.entity';
 import { Dislike } from './schemas/dislike.entity';
-import { Match } from './schemas/match.entity';
-import { UserLiked } from './schemas/user-liked.entity';
 
 export type UserFlag = 'all' | 'activeRoom' | 'currentPartner';
 
@@ -612,7 +610,6 @@ export class UserService {
       .andWhere('dislike.id IS NULL')
       .andWhere('likedMe.id IS NOT NULL')
       .andWhere('iLiked.id IS NULL')
-      .orderBy('likedMe.id', 'DESC')
       .getOne();
 
     return user || null;
@@ -624,19 +621,19 @@ export class UserService {
   ): Promise<User | null> {
     const user = await this.userRepository
       .createQueryBuilder('user')
-      .leftJoin(
+      .innerJoin(
         Like,
         'likeOutgoing',
         '(likeOutgoing.user_id = :userId AND likeOutgoing.likedUserId = user.userId)',
         { userId },
       )
-      .leftJoin(
+      .innerJoin(
         Like,
         'likeIncoming',
         '(likeIncoming.user_id = user.userId AND likeIncoming.likedUserId = :userId)',
         { userId },
       )
-      .leftJoin(
+      .leftJoinAndSelect(
         Dislike,
         'dislike',
         '(dislike.user_id = :userId AND dislike.dislikedUserId = user.userId)',
@@ -646,8 +643,6 @@ export class UserService {
       .andWhere('user.isBlocked = false')
       .andWhere('user.isVisibleToOthers = true')
       .andWhere('dislike.id IS NULL')
-      .andWhere('likeIncoming.id IS NOT NULL')
-      .andWhere('likeOutgoing.id IS NOT NULL')
       .orderBy('user.id', 'DESC') // Указывает порядок сортировки
       .skip(offset)
       .take(1)
