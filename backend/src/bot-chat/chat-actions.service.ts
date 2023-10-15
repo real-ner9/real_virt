@@ -381,7 +381,13 @@ export class ChatActionsService {
           'find_partner',
         ),
       ],
-      [Markup.button.callback('📄 Смотреть анкеты', 'browsing_profiles')],
+      // [Markup.button.callback('📄 Смотреть анкеты', 'browsing_profiles')],
+      [
+        Markup.button.webApp(
+          '📄 Смотреть анкеты',
+          'https://45dc-104-232-36-21.ngrok-free.app/',
+        ),
+      ],
       [Markup.button.callback('✏️ Редактировать профиль', 'edit_profile')],
     ];
 
