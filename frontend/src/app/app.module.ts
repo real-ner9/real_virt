@@ -8,6 +8,9 @@ import { HttpInterceptorService } from './http-Interceptor';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from './shared/shared.module';
 import { CommonModule } from '@angular/common';
+import { StoreModule } from '@ngrx/store';
+import { routerReducer, StoreRouterConnectingModule } from '@ngrx/router-store';
+import { EffectsModule } from '@ngrx/effects';
 
 declare global {
   interface Window {
@@ -26,6 +29,22 @@ declare global {
     HttpClientModule,
     BrowserAnimationsModule,
     SharedModule,
+    StoreRouterConnectingModule.forRoot(),
+    EffectsModule.forRoot([]),
+    StoreModule.forRoot(
+      {
+        router: routerReducer,
+      },
+      {
+        runtimeChecks: {
+          strictActionImmutability: true,
+          strictStateImmutability: true,
+          strictActionTypeUniqueness: true,
+          strictStateSerializability: true,
+          strictActionWithinNgZone: true,
+        },
+      }
+    ),
   ],
   providers: [
     {

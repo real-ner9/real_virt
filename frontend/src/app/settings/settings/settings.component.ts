@@ -6,5 +6,7 @@ import { Component } from '@angular/core';
   styleUrls: ['./settings.component.scss']
 })
 export class SettingsComponent {
-
+  constructor() {
+    console.log('hello');
+  }
 }

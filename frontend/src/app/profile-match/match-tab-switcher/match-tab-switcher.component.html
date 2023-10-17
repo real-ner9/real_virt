@@ -1,0 +1,22 @@
+<mat-tab-group
+  #tabGroup
+  class="match-tab-switcher"
+  (selectedTabChange)="onTabChange($event)"
+  [selectedIndex]="activeLinkIndex">
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <div class="tab-label-container" [class.active]="activeLinkIndex === 0">Мэтчи</div>
+    </ng-template>
+    <ng-template matTabContent>
+      <router-outlet></router-outlet>
+    </ng-template>
+  </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <div class="tab-label-container" [class.active]="activeLinkIndex === 1">Приглашения</div>
+    </ng-template>
+    <ng-template matTabContent>
+      <router-outlet></router-outlet>
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>

@@ -1,4 +1,9 @@
-<mat-tab-group class="main-tab-switcher" (selectedTabChange)="onTabChange($event)" headerPosition="below">
+<mat-tab-group
+  #tabGroup
+  [(selectedIndex)]="activeLinkIndex"
+  class="main-tab-switcher"
+  (selectedTabChange)="onTabChange($event)"
+  headerPosition="below">
   <mat-tab>
     <ng-template mat-tab-label>
       <div class="tab-label-container" [class.active]="activeLinkIndex === 0">
@@ -10,9 +15,9 @@
         <div class="tab-label tab-label_matches">Мэтчи</div>
       </div>
     </ng-template>
-    <ng-container *ngIf="activeLinkIndex === 0">
+    <ng-template matTabContent>
       <router-outlet></router-outlet>
-    </ng-container>
+    </ng-template>
   </mat-tab>
   <mat-tab>
     <ng-template mat-tab-label>
@@ -24,9 +29,9 @@
         <div class="tab-label tab-label_feed">Лента</div>
       </div>
     </ng-template>
-    <ng-container *ngIf="activeLinkIndex === 1">
+    <ng-template matTabContent>
       <router-outlet></router-outlet>
-    </ng-container>
+    </ng-template>
   </mat-tab>
   <mat-tab>
     <ng-template mat-tab-label>
@@ -38,8 +43,8 @@
         <div class="tab-label tab-label_settings">Профиль</div>
       </div>
     </ng-template>
-    <ng-container *ngIf="activeLinkIndex === 2">
+    <ng-template matTabContent>
       <router-outlet></router-outlet>
-    </ng-container>
+    </ng-template>
   </mat-tab>
 </mat-tab-group>

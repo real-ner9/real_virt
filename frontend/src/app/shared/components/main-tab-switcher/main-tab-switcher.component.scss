@@ -1,14 +1,15 @@
 @import "../../../../styles/palete";
 
-.main-tab-switcher ::ng-deep {
-  .mat-mdc-tab-header {
+::ng-deep .main-tab-switcher {
+  > .mat-mdc-tab-header {
     position: fixed;
-    bottom: 40px;
+    bottom: 10px;
     left: 50%;
     transform: translate(-50%, -50%);
     border-radius: 80px;
     background: rgba(26, 29, 31, 0.50);
     padding: 5px;
+    z-index: 1000;
 
     &::before {
       content: '';
@@ -20,82 +21,82 @@
       top: 0;
       left: 0;
     }
-  }
 
-  .mdc-tab-indicator {
-    display: none;
-  }
-
-  .icon-container {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(227deg, #625D7C 6.81%, #35343B 95.79%), #313539;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    &.active {
-      background: linear-gradient(227deg, #9489CF 6.81%, #4C33C6 95.79%);
-      stroke-width: 0.5px;
-      stroke: #B3AADD;
-      box-shadow: -2px -4px 4px 0px #897BD8 inset, 6px 1px 10px 0px #4633A8 inset, -3px -2px 4px 0px rgba(154, 144, 209, 0.80) inset, 3px -2px 4px 0px #44329D inset, 1px 0px 1px 0px #5136D9 inset, -1px 0px 1px 0px #B9AEF3 inset;
+    .mdc-tab-indicator {
+      display: none;
     }
-  }
 
-  .tab-label-container {
-    font-family: $font-family;
-    font-stretch: condensed;
-    font-weight: 500;
-    font-style: normal;
-    font-size: 15px;
-    display: flex;
-    gap: 0;
-    align-items: center;
-    color: white;
-    background: #272B30;
-    border-radius: 36px;
-    padding: 5px;
-    &.active {
-      padding-right: 12px;
-      gap: 8px;
+    .icon-container {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(227deg, #625D7C 6.81%, #35343B 95.79%), #313539;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-      .tab-label {
-        &_settings {
-          max-width: 77px;
-        }
+      &.active {
+        background: linear-gradient(227deg, #9489CF 6.81%, #4C33C6 95.79%);
+        stroke-width: 0.5px;
+        stroke: #B3AADD;
+        box-shadow: -2px -4px 4px 0px #897BD8 inset, 6px 1px 10px 0px #4633A8 inset, -3px -2px 4px 0px rgba(154, 144, 209, 0.80) inset, 3px -2px 4px 0px #44329D inset, 1px 0px 1px 0px #5136D9 inset, -1px 0px 1px 0px #B9AEF3 inset;
+      }
+    }
 
-        &_matches {
-          max-width: 50px;
-        }
+    .tab-label-container {
+      font-family: $font-family;
+      font-stretch: condensed;
+      font-weight: 500;
+      font-style: normal;
+      font-size: 15px;
+      display: flex;
+      gap: 0;
+      align-items: center;
+      color: white;
+      background: #272B30;
+      border-radius: 36px;
+      padding: 5px;
+      &.active {
+        padding-right: 12px;
+        gap: 8px;
 
-        &_feed {
-          max-width: 50px;
+        .tab-label {
+          &_settings {
+            max-width: 77px;
+          }
+
+          &_matches {
+            max-width: 50px;
+          }
+
+          &_feed {
+            max-width: 50px;
+          }
         }
       }
     }
-  }
 
-  .tab-label {
-    max-width: 0;
-    overflow: hidden;
-    transition: 300ms;
-  }
+    .tab-label {
+      max-width: 0;
+      overflow: hidden;
+      transition: 300ms;
+    }
 
-  .mdc-tab {
-    padding: 0;
-    min-width: auto;
-  }
+    .mdc-tab {
+      padding: 0;
+      min-width: auto;
+    }
 
-  .mat-mdc-tab-header .mat-mdc-tab.mat-mdc-tab {
-    flex-grow: 0;
-  }
+    .mat-mdc-tab-header .mat-mdc-tab.mat-mdc-tab {
+      flex-grow: 0;
+    }
 
-  .mat-mdc-tab-labels {
-    gap: 10px;
-  }
+    .mat-mdc-tab-labels {
+      gap: 10px;
+    }
 
-  .mat-mdc-tab-ripple {
-    border-radius: 15px;
+    .mat-mdc-tab-ripple {
+      border-radius: 15px;
+    }
   }
 }

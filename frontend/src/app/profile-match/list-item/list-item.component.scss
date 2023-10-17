@@ -1,0 +1,92 @@
+@import "../../../styles/palete";
+
+.item {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  color: #E2E2E9;
+  padding: 25px 20px 20px;
+  border-radius: 25px;
+  border: 1px solid #2D2D39;
+
+  background: #242429;
+}
+
+.name-container {}
+
+.image {
+  margin-top: 10px;
+  border-radius: 10px;
+  img {
+    width: 100%;
+    border-radius: 10px;
+  }
+}
+
+.name {
+  @include text-medium();
+  font-size: 18px;
+}
+
+.tg-link {
+  @include link-styled();
+}
+
+.statuses {
+  margin-top: 5px;
+}
+
+.online {
+  @include text-base(#8058F4);
+}
+
+.hint {
+  @include text-base(#4C4C61);
+}
+
+.content {
+  margin-top: 10px;
+  @include text-base();
+  line-height: 21px;
+}
+
+.icon-button {
+  height: fit-content;
+  width: fit-content;
+  min-width: fit-content;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  background: none;
+  transition: 200ms;
+
+  &:active {
+    transform: scale(90%);
+  }
+
+  &.approve {
+    margin-left: 4px;
+  }
+}
+
+.text-button {
+  @include text-medium();
+  font-size: 18px;
+  border-radius: 50px;
+  padding: 18px 17px;
+  height: fit-content;
+
+  &.danger {
+    background: #FF542E;
+  }
+
+  &.primary {
+    background: #642EFF;
+  }
+}
+
+.actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: end;
+}

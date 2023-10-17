@@ -4,4 +4,7 @@ export type Icon = 'settings'
   | 'matches-active'
   | 'feed-active'
   | 'feed'
+  | 'link'
+  | 'approve'
+  | 'cancel'
   | null

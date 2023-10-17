@@ -164,4 +164,21 @@
       </defs>
     </svg>
   </ng-template>
+  <ng-template [ngSwitchCase]="'link'">
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none">
+      <path d="M5.74572 9.04591L9.04556 5.74608M4.50851 6.98338L3.68355 7.80834C2.77233 8.71957 2.77206 10.1971 3.68329 11.1083C4.59451 12.0195 6.07233 12.0192 6.98356 11.108L7.80763 10.2831M6.98303 4.50829L7.80799 3.68334C8.71921 2.77211 10.1964 2.77228 11.1076 3.6835C12.0189 4.59472 12.0188 6.07212 11.1076 6.98334L10.2831 7.80828" stroke="#007AFF" stroke-width="1.16667" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </ng-template>
+  <ng-template [ngSwitchCase]="'approve'">
+    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" fill="none">
+      <rect width="50" height="50" rx="25" fill="#642EFF"/>
+      <path d="M19 25L23.2161 29.6377C23.6283 30.0911 24.3477 30.0705 24.7333 29.5942L32.5 20" stroke="white" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </ng-template>
+  <ng-template [ngSwitchCase]="'cancel'">
+    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" fill="none">
+      <rect width="50" height="50" rx="25" fill="#FF542E"/>
+      <path d="M19 19L25 25M31 31L25 25M25 25L31 19M25 25L19 31" stroke="white" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </ng-template>
 </ng-container>

@@ -1,1 +1,48 @@
 $font-family: "Golos UI", sans-serif;
+$accent-blue: #007AFF;
+
+@mixin text-base($text-color: white) {
+  font-family: $font-family;
+  font-style: normal;
+  font-weight: 400;
+  color: $text-color;
+  font-size: 14px;
+  line-height: 19.6px;
+  font-feature-settings: 'tnum' on, 'lnum' on, 'liga' off;
+}
+
+@mixin text-medium($text-color: white) {
+  @include text-base($text-color);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 15px;
+  font-feature-settings: 'tnum' on, 'lnum' on, 'liga' off;
+}
+
+@mixin text-medium($text-color: white) {
+  @include text-base($text-color);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 15px;
+  font-feature-settings: 'tnum' on, 'lnum' on, 'liga' off;
+}
+
+@mixin link-styled-font($color-normal, $color-hover, $color-active, $color-visited) {
+  @include text-base($color-normal);
+
+  &:hover,
+  &:active {
+    text-decoration: underline;
+    color: $color-hover;
+  }
+
+  &:visited {
+    color: $color-visited;
+  }
+}
+
+@mixin link-styled($color-normal: $accent-blue, $color-hover: $accent-blue, $color-active: $accent-blue, $color-visited: $accent-blue) {
+  @include link-styled-font ($color-normal, $color-hover, $color-active, $color-visited);
+
+  text-decoration: none;
+}
