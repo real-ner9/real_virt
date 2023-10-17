@@ -391,7 +391,7 @@ export class ChatActionsService {
       [
         Markup.button.webApp(
           '📄 Смотреть анкеты',
-          'https://45dc-104-232-36-21.ngrok-free.app/',
+          'https://5ab5-104-232-36-147.ngrok-free.app/',
         ),
       ],
       [Markup.button.callback('✏️ Редактировать профиль', 'edit_profile')],

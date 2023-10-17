@@ -1,7 +1,7 @@
 export type Icon = 'settings'
   | 'settings-active'
-  | 'likes'
-  | 'likes-active'
+  | 'matches'
+  | 'matches-active'
   | 'feed-active'
   | 'feed'
   | null

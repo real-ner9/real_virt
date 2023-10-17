@@ -16,7 +16,7 @@ export class MainTabSwitcherComponent {
     this.activeLinkIndex = event.index;
     switch (event.index) {
       case 0:
-        this.router.navigate(['/likes']);
+        this.router.navigate(['/matches']);
         break;
       case 1:
         this.router.navigate(['/feed']);

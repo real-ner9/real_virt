@@ -6,8 +6,8 @@ import { SettingsModule } from './settings/settings.module';
 
 const routes: Routes = [
   // { path: '**', component: PageNotFoundComponent },
-  { path: '', redirectTo: 'likes', pathMatch: 'full' },
-  { path: 'likes', loadChildren: () => ProfileMatchModule },
+  { path: '', redirectTo: 'matches', pathMatch: 'full' },
+  { path: 'matches', loadChildren: () => ProfileMatchModule },
   { path: 'feed', loadChildren: () => FeedModule },
   { path: 'settings', loadChildren: () => SettingsModule },
 ];
