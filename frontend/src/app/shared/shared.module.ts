@@ -4,7 +4,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { IconComponent } from './components/icon/icon.component';
-import { BackgroundForSwitcherComponent } from './background-for-switcher/background-for-switcher.component';
+import { BackgroundForSwitcherComponent } from './components/background-for-switcher/background-for-switcher.component';
 
 @NgModule({
   declarations: [

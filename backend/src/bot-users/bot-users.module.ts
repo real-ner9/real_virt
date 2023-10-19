@@ -8,9 +8,20 @@ import { Dislike } from './schemas/dislike.entity';
 import { UserLiked } from './schemas/user-liked.entity';
 import { Match } from './schemas/match.entity';
 import { UserController } from './user.controller';
+import { UsersWebSocketGateway } from './user-websocket-gateway';
+import { Connection } from './schemas/connection.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Like, Dislike, UserLiked, Match])],
+  imports: [
+    TypeOrmModule.forFeature([
+      User,
+      Like,
+      Dislike,
+      UserLiked,
+      Match,
+      Connection,
+    ]),
+  ],
   providers: [
     UserService,
     {
@@ -33,7 +44,12 @@ import { UserController } from './user.controller';
       provide: 'MATCH_REPOSITORY',
       useValue: Match,
     },
+    {
+      provide: 'CONNECTION_REPOSITORY',
+      useValue: Connection,
+    },
     UserActionsService,
+    UsersWebSocketGateway,
   ],
   controllers: [UserController],
   exports: [UserService, UserActionsService],

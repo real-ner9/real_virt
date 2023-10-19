@@ -6,8 +6,7 @@ import { UserState } from './types/user-state';
 import { UserRole } from './types/user-role';
 import { Like } from './schemas/like.entity';
 import { Dislike } from './schemas/dislike.entity';
-import { Match } from './schemas/match.entity';
-import { UserLiked } from './schemas/user-liked.entity';
+import { Connection } from './schemas/connection.entity';
 
 export type UserFlag = 'all' | 'activeRoom' | 'currentPartner';
 
@@ -26,6 +25,8 @@ export class UserService {
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Dislike)
     private readonly dislikeRepository: Repository<Dislike>,
+    @InjectRepository(Connection)
+    private readonly connectionRepository: Repository<Connection>,
   ) {
     setInterval(async () => {
       this.invalidateCache();
@@ -654,5 +655,60 @@ export class UserService {
       .getOne();
 
     return user || null;
+  }
+
+  async getOnline(userId: string | number): Promise<boolean> {
+    const user = await this.getUserFromCacheOrDB(`${userId}`);
+
+    return user?.online || null;
+  }
+
+  async setOnline(userId: number | string, online: boolean) {
+    const user = await this.getUserFromCacheOrDB(`${userId}`);
+
+    if (user) {
+      user.online = online;
+
+      await this.userRepository.save(user);
+      this.updateCache(user);
+    }
+  }
+
+  async setConnection(userId: string | number, connectionId: string) {
+    const user = await this.userRepository.findOne({
+      where: { userId: `${userId}` },
+      relations: ['connections'],
+    });
+
+    if (!user) return;
+
+    const existingConnection = user.connections.find(
+      (connection) => connection.connectId === connectionId,
+    );
+    if (existingConnection) {
+      return await this.connectionRepository.remove(existingConnection);
+    }
+
+    const newConnection = new Connection(user, connectionId);
+
+    return await this.connectionRepository.save(newConnection);
+  }
+
+  async removeConnectionWithSocketId(connectionId: string) {
+    const connection = await this.connectionRepository.findOne({
+      where: { connectId: connectionId },
+      relations: ['user'],
+    });
+
+    await this.connectionRepository.remove(connection);
+
+    const activeConnections = await this.connectionRepository.count({
+      where: { user: { id: connection.user.id } },
+    });
+
+    if (activeConnections === 0 && connection.user) {
+      connection.user.online = false;
+      await this.userRepository.save(connection.user);
+    }
   }
 }

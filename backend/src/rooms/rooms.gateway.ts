@@ -11,7 +11,9 @@ import { Server, Socket } from 'socket.io';
 import { RoomsService } from './rooms.service';
 import { Attachment } from './models/attachment';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  namespace: '/rooms',
+})
 export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 

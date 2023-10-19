@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, HostListener, OnDestroy } from '@angular/core';
 import { UserService } from './shared/services/user.service';
+import { SocketService } from './shared/services/user-socket.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnDestroy {
   title = 'frontend';
   webApp = window.Telegram.WebApp;
   user: any = {};
@@ -14,8 +15,13 @@ export class AppComponent {
 
   constructor(
     private readonly userService: UserService,
+    private readonly socketUserService: SocketService,
   ) {
     const params = new URLSearchParams(window.location.hash.slice(1));
+
+    console.log(this.webApp);
+
+    this.webApp.sendData('dsadsa');
     //
     // // Convert it to more user-friendly object.
     const initDataString = params.get('tgWebAppData'); // user=...&query_id=...&...
@@ -38,15 +44,17 @@ export class AppComponent {
     //   error => console.error('error', error)
     // );
 
+    console.log('localstore', localStorage.getItem('logout'))
+
     this.updateTelegramData();
 
-    // this.userService.authorize().subscribe(
-    //   response => console.log('response: ', response),
-    //   error => {
-    //     console.log(error);
-    //     this.error = error.error.reason
-    //   },
-    // );
+    this.userService.authorize().subscribe(
+      response => console.log('response: ', response),
+      error => {
+        console.log(error);
+        this.error = error.error.reason
+      },
+    );
 
     this.webApp.expand();
   }
@@ -66,5 +74,17 @@ export class AppComponent {
         }
       }
     }
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  unloadNotification($event: any): void {
+    localStorage.setItem('logout', 'true');
+    // const url = 'your-server-endpoint';
+    // const data = {}; // ваш данные
+    // navigator.sendBeacon(url, JSON.stringify(data));
+  }
+
+  ngOnDestroy() {
+    console.log('destroy');
   }
 }

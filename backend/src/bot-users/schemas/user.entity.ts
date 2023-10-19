@@ -5,6 +5,7 @@ import { Like } from './like.entity';
 import { Dislike } from './dislike.entity';
 import { UserLiked } from './user-liked.entity';
 import { Match } from './match.entity';
+import { Connection } from './connection.entity';
 
 @Entity()
 export class User {
@@ -74,11 +75,17 @@ export class User {
   @OneToMany(() => Match, (match) => match.user)
   matches: Match[];
 
+  @OneToMany(() => Connection, (connection) => connection.user)
+  connections: Connection[];
+
   @Column({ type: 'text', nullable: true })
   username: string;
 
   @Column({ default: false })
   showUsername: boolean;
+
+  @Column({ default: false })
+  online: boolean;
 
   constructor(userId: string) {
     this.userId = userId;
