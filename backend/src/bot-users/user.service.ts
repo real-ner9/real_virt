@@ -8,6 +8,7 @@ import { Like } from './schemas/like.entity';
 import { Dislike } from './schemas/dislike.entity';
 import { Connection } from './schemas/connection.entity';
 import { ChatRequest } from './schemas/chat-request.entity';
+import { paginate } from '../utils/paginate';
 
 export type UserFlag = 'all' | 'activeRoom' | 'currentPartner';
 
@@ -717,7 +718,7 @@ export class UserService {
 
   async getMatches(userId: number | string) {
     userId = `${userId}`;
-    const users = await this.userRepository
+    const baseQuery = this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.receivedRequests', 'receivedRequest')
       .leftJoinAndSelect('receivedRequest.sender', 'sender')
@@ -753,8 +754,9 @@ export class UserService {
       .andWhere('likeIncoming.id IS NOT NULL')
       .andWhere('likeOutgoing.id IS NOT NULL')
       .andWhere('sentRequest.id IS NULL') // исключаем пользователей, которые отправили запрос
-      .orderBy('user.id', 'DESC')
-      .getMany();
+      .orderBy('user.id', 'DESC');
+    const users = await baseQuery.getMany();
+    const total = await baseQuery.getCount();
 
     // Добавляем поле, показывающее, был ли отправлен запрос на чат
     const enhancedUsers = users.map(({ receivedRequests, ...user }) => ({
@@ -766,7 +768,12 @@ export class UserService {
       ),
     }));
 
-    return enhancedUsers.length ? { content: enhancedUsers } : { content: [] };
+    return paginate({
+      list: enhancedUsers,
+      totalElements: total,
+      pageSize: 1,
+      pageNumber: 1,
+    });
   }
 
   async getRequests(userId: number | string) {
@@ -782,6 +789,22 @@ export class UserService {
       .orderBy('chatRequest.requestedAt', 'DESC')
       .getMany();
 
-    return users.length ? { content: users } : { content: [] };
+    const total = await this.userRepository
+      .createQueryBuilder('user')
+      .innerJoinAndSelect(
+        'user.sentRequests',
+        'chatRequest',
+        'chatRequest.sender_id = user.userId',
+      )
+      .where('chatRequest.receiver_id = :userId', { userId })
+      .orderBy('chatRequest.requestedAt', 'DESC')
+      .getCount();
+
+    return paginate<User>({
+      list: users,
+      totalElements: total,
+      pageSize: 1,
+      pageNumber: 1,
+    });
   }
 }
