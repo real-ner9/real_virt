@@ -20,4 +20,12 @@ export class MatchListComponent implements OnInit {
   onMatchRemoved(matchId: number) {
     this.matchesFacade.removeMatch(matchId);
   }
+
+  onRequest(id: number) {
+    this.matchesFacade.requestMatch(id);
+  }
+
+  onCancelRequest(id: number) {
+    this.matchesFacade.cancelRequestMatch(id);
+  }
 }

@@ -58,6 +58,59 @@ export class UsersWebSocketGateway
     console.log(client, data);
   }
 
+  @SubscribeMessage('requestMatch')
+  async handleRequestMatch(client: Socket, data: { id: number }): Promise<any> {
+    try {
+      // Assume userService has a method to handle match requests
+      const { connections, user } = await this.userService.requestMatch(
+        client.id,
+        data.id,
+      );
+      client.emit('requestMatchResponse', { success: true });
+
+      connections.forEach((connection) => {
+        try {
+          this.server
+            .to(connection.connectId)
+            .emit('matchRequest', { user: user });
+        } catch (e) {
+          console.error('matchRequest: ', e.message);
+        }
+      });
+    } catch (error) {
+      console.error('handleRequestMatch error', error.message);
+      client.emit('requestMatchResponse', { error: error.message });
+    }
+  }
+
+  @SubscribeMessage('cancelRequestMatch')
+  async handleCancelRequestMatch(
+    client: Socket,
+    data: { id: number },
+  ): Promise<any> {
+    try {
+      // Assume userService has a method to handle match cancellation requests
+      const { connections, user } = await this.userService.cancelRequestMatch(
+        client.id,
+        data.id,
+      );
+      client.emit('cancelRequestMatchResponse', { success: true });
+
+      connections.forEach((connection) => {
+        try {
+          this.server
+            .to(connection.connectId)
+            .emit('matchRequestCanceled', { user: user });
+        } catch (e) {
+          console.error('matchRequestCancelled: ', e.message);
+        }
+      });
+    } catch (error) {
+      console.error('handleCancelRequestMatch error', error.message);
+      client.emit('cancelRequestMatchResponse', { error: error.message });
+    }
+  }
+
   inviteToChat(userFromId: string, userToId: string) {
     this.server.to(userToId).emit('inviteToChat', { from: userFromId });
   }

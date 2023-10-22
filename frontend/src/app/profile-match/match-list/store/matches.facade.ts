@@ -24,4 +24,12 @@ export class MatchesFacade {
   removeMatch(matchId: number) {
     this.store.dispatch(MatchesActions.removeMatch({ matchId }));
   }
+
+  requestMatch(id: number) {
+    this.store.dispatch(MatchesActions.requestMatch({id}));
+  }
+
+  cancelRequestMatch(id: number) {
+    this.store.dispatch(MatchesActions.cancelRequestMatch({id}));
+  }
 }

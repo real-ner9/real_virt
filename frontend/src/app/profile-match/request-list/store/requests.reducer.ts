@@ -7,6 +7,8 @@ import {
   cancelRequest,
 } from './requests.actions';
 import { User } from '../../../shared/models/user';
+import { matchRequestCanceled, matchRequested } from '../../match-list/store/matches.actions';
+import { Match } from '../../../shared/models/match';
 
 export interface RequestsState {
   requests: User[];
@@ -29,5 +31,17 @@ export const requestsReducer = createReducer(
   on(cancelRequest, (state, { requestId }) => ({
     ...state,
     requests: state.requests.filter(request => request.id !== requestId)
-  }))
+  })),
+  on(matchRequested, (state, {user}) => ({
+    ...state,
+    requests: [
+      user,
+      ...state.requests,
+    ],
+  })),
+
+  on(matchRequestCanceled, (state, { user }) => ({
+    ...state,
+    requests: state.requests.length ? [...state.requests.filter((request) => user.id !== request.id)] : [],
+  })),
 );

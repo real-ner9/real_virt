@@ -9,4 +9,6 @@ export const loadRequestsFailure = createAction('[Requests] Load Requests Failur
 export const addRequest = createAction('[Requests] Add Request', props<{ request: User }>());
 export const approveRequest = createAction('[Requests] Approve Request', props<{ requestId: number }>());
 export const cancelRequest = createAction('[Requests] Cancel Request', props<{ requestId: number }>());
+export const matchRequested = createAction('[Requests] Match Requested', props<{ user: User }>());
+export const matchRequestCanceled = createAction('[Requests] Match Request Canceled', props<{ user: User }>());
 

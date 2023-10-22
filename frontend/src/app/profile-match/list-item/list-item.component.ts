@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { User } from '../../shared/models/user';
 import { UserRoleMap } from '../../shared/models/user-role';
 
@@ -13,21 +13,26 @@ export class ListItemComponent {
   @Input() page: 'requests' | 'matches' = 'requests';
   @Input() value?: EnhancedUser;
 
+  @Output() cancel = new EventEmitter<number>();
+  @Output() approve = new EventEmitter<number>();
+  @Output() request = new EventEmitter<number>();
+  @Output() cancelRequest = new EventEmitter<number>();
+
   protected readonly UserRoleMap = UserRoleMap;
 
   handleCancel() {
-    console.log('handleCancel');
+    this.cancel.emit(this.value?.id);
   }
 
   handleApprove() {
-    console.log('handleApprove');
+    this.approve.emit(this.value?.id);
   }
 
   handleRequest() {
-    console.log('handleRequest');
+    this.request.emit(this.value?.id);
   }
 
   handleCancelRequest() {
-    console.log('handleCancelRequest');
+    this.cancelRequest.emit(this.value?.id);
   }
 }

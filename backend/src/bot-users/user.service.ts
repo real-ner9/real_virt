@@ -903,4 +903,71 @@ export class UserService {
       pageNumber,
     });
   }
+
+  async requestMatch(
+    socketId: string,
+    partnerId: number,
+  ): Promise<{ user: User; connections: Connection[] }> {
+    const connection = await this.connectionRepository.findOne({
+      where: { connectId: socketId },
+      relations: ['user'],
+    });
+    if (!connection || !connection.user) return;
+
+    const userId = connection.user.userId;
+    const user = await this.userRepository.findOne({ where: { userId } });
+    const partner = await this.userRepository.findOne({
+      where: { id: partnerId },
+      relations: ['connections'],
+    });
+    if (!user || !partner) return;
+
+    const existingChatRequest = await this.chatRequestRepository.findOne({
+      where: {
+        sender: { id: user.id },
+        receiver: { id: partner.id },
+      },
+    });
+    if (!existingChatRequest) {
+      const newChatRequest = new ChatRequest(user, partner);
+      await this.chatRequestRepository.save(newChatRequest);
+
+      return { user, connections: partner.connections };
+    }
+  }
+
+  async cancelRequestMatch(
+    socketId: string,
+    partnerId: number,
+  ): Promise<{ user: User; connections: Connection[] }> {
+    // Находим соединение по socketId
+    const connection = await this.connectionRepository.findOne({
+      where: { connectId: socketId },
+      relations: ['user'],
+    });
+    if (!connection || !connection.user) return;
+
+    // Получаем userId из соединения и находим пользователя и партнера
+    const userId = connection.user.userId;
+    const user = await this.userRepository.findOne({ where: { userId } });
+    const partner = await this.userRepository.findOne({
+      where: { id: partnerId },
+      relations: ['connections'],
+    });
+    if (!user || !partner) return;
+
+    // Проверяем наличие существующего запроса на чат между этими двумя пользователями
+    const existingChatRequest = await this.chatRequestRepository.findOne({
+      where: {
+        sender: { id: user.id },
+        receiver: { id: partner.id },
+      },
+    });
+    if (existingChatRequest) {
+      // Если существующий запрос на чат найден, удаляем его
+      await this.chatRequestRepository.remove(existingChatRequest);
+
+      return { user, connections: partner.connections };
+    }
+  }
 }
