@@ -1,11 +1,9 @@
-<div class="items">
-  <app-feed-list-item page="feed" *ngFor="let item of (feed$ | async)" [value]="item"></app-feed-list-item>
+<div class="items" *ngIf="(feed$ | async) as items" waIntersectionObserver>
+  <app-feed-list-item
+    page="feed"
+    *ngFor="let item of items; let i = index"
+    [value]="item"
+    (waIntersectionObservee)="onIntersection($event, i, items.length)">
+  </app-feed-list-item>
 </div>
-<div
-  infiniteScroll
-  [infiniteScrollDistance]="scrollDistance"
-  [infiniteScrollUpDistance]="scrollUpDistance"
-  [infiniteScrollThrottle]="throttle"
-  (scrolled)="onScroll()"
-></div>
 <app-background-for-switcher></app-background-for-switcher>

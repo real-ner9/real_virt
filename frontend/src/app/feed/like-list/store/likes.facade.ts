@@ -12,6 +12,7 @@ export class LikesFacade {
   totalPages$ = this.store.select(LikesSelectors.getTotalPages);
   pageSize$ = this.store.select(LikesSelectors.getPageSize);
   pageNumber$ = this.store.select(LikesSelectors.getPageNumber);
+  prevPageNumber = 1;
 
   constructor(private store: Store) {
   }
@@ -38,8 +39,9 @@ export class LikesFacade {
       this.pageNumber$,
     ]).pipe(
       take(1),
-      filter(([total, , pageNumber]) => total > 1 && pageNumber <= total)
+      filter(([total, , pageNumber]) => total > 1 && pageNumber <= total && this.prevPageNumber !== pageNumber)
     ).subscribe(([, pageSize, pageNumber]) => {
+      this.prevPageNumber++;
       this.store.dispatch(LikesActions.loadLikes({pageSize, pageNumber: ++pageNumber}));
     });
   }

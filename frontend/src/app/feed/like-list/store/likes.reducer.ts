@@ -34,7 +34,7 @@ export const likesReducer = createReducer(
 
   on(LikesActions.loadLikesSuccess, (state, action) => ({
     ...state,
-    data: state.data.length && state.pageNumber > 1 ? [...state.data, ...action.data.content] : [...action.data.content],
+    data: state.data.length && action.data.number > 1 ? [...state.data, ...action.data.content] : [...action.data.content],
     totalElements: action.data.size,
     totalPages: action.data.totalPages || 1,
     error: null,

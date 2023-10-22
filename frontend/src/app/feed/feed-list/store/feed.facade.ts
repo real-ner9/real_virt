@@ -13,6 +13,7 @@ export class FeedFacade {
   pageNumber$ = this.store.select(FeedSelectors.getFeedPageNumber);
   error$ = this.store.select(FeedSelectors.getFeedError);
   totalPages$ = this.store.select(FeedSelectors.getTotalPages);
+  prevPageNumber = 1;
 
   constructor(private store: Store) {}
 
@@ -46,8 +47,9 @@ export class FeedFacade {
       this.pageNumber$,
     ]).pipe(
       take(1),
-      filter(([total, , pageNumber]) => total > 1 && pageNumber <= total)
+      filter(([total, , pageNumber]) => total > 1 && pageNumber <= total && this.prevPageNumber !== pageNumber)
     ).subscribe(([, pageSize, pageNumber]) => {
+      this.prevPageNumber++;
       this.store.dispatch(FeedActions.loadFeed({ pageSize, pageNumber: ++pageNumber }));
     });
   }

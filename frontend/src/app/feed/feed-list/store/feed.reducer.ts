@@ -27,7 +27,7 @@ export const feedReducer = createReducer(
   on(FeedActions.loadFeed, (state) => ({ ...state, loading: true, })),
   on(FeedActions.loadFeedSuccess, (state, { page }) => ({
     ...state,
-    data: state.data.length && state.pageNumber > 1 ? [...state.data, ...page.content] : [...page.content],
+    data: state.data.length && page.number > 1 ? [...state.data, ...page.content] : [...page.content],
     totalPages: page.totalPages || 1,
     pageNumber: page.number,
     pageSize: page.size,

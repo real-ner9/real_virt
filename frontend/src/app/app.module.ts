@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { StoreModule } from '@ngrx/store';
 import { routerReducer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { EffectsModule } from '@ngrx/effects';
+import { IntersectionObserverModule } from '@ng-web-apis/intersection-observer';
 
 declare global {
   interface Window {
@@ -31,6 +32,7 @@ declare global {
     SharedModule,
     StoreRouterConnectingModule.forRoot(),
     EffectsModule.forRoot([]),
+    IntersectionObserverModule,
     StoreModule.forRoot(
       {
         router: routerReducer,

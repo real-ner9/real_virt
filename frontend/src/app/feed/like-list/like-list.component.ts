@@ -9,10 +9,6 @@ import { LikesFacade } from './store/likes.facade';
 export class LikeListComponent implements OnInit, OnDestroy {
   likes$ = this.facade.likes$;
 
-  scrollDistance = 1.5;
-  scrollUpDistance = 1.5;
-  throttle = 500;
-
   constructor(private readonly facade: LikesFacade) {}
 
   ngOnInit() {
@@ -20,11 +16,13 @@ export class LikeListComponent implements OnInit, OnDestroy {
     this.facade.loadLikes();
   }
 
-  onScroll() {
-    this.facade.onScroll();
-  }
-
   ngOnDestroy() {
     this.facade.clearLikes();
+  }
+
+  onIntersection(event: IntersectionObserverEntry[], index: number, itemsLength: number) {
+    if (event[0].intersectionRatio > 0 && index === itemsLength - 2) {
+      this.facade.onScroll();
+    }
   }
 }

@@ -18,6 +18,7 @@ import { FeedEffects } from './feed-list/store/feed.effects';
 import { likesReducer } from './like-list/store/likes.reducer';
 import { LikesEffects } from './like-list/store/likes.effects';
 import { MatChipsModule } from '@angular/material/chips';
+import { IntersectionObserverModule } from '@ng-web-apis/intersection-observer';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { MatChipsModule } from '@angular/material/chips';
     StoreModule.forFeature('likes', likesReducer),
     EffectsModule.forFeature([LikesEffects]),
     MatChipsModule,
-  ]
+    IntersectionObserverModule,
+  ],
 })
 export class FeedModule { }

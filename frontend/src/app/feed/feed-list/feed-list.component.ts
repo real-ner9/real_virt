@@ -9,25 +9,22 @@ import { FeedFacade } from './store/feed.facade';
 export class FeedListComponent implements OnInit, OnDestroy {
   feed$ = this.facade.feed$;
 
-  scrollDistance = 1.5;
-  scrollUpDistance = 1.5;
-  throttle = 500;
-
   constructor(
     private facade: FeedFacade,
-  ) {
-  }
+  ) {}
 
   ngOnInit() {
     this.facade.clearFeed();
-    this.facade.loadFeed()
-  }
-
-  onScroll() {
-    this.facade.onScroll();
+    this.facade.loadFeed();
   }
 
   ngOnDestroy() {
     this.facade.clearFeed();
+  }
+
+  onIntersection(event: IntersectionObserverEntry[], index: number, itemsLength: number) {
+    if (event[0].intersectionRatio > 0 && index === itemsLength - 2) {
+      this.facade.onScroll();
+    }
   }
 }
