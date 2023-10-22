@@ -24,3 +24,18 @@ export const getLikedUsersLoading = createSelector(
   selectLikesState,
   state => state.loading
 );
+
+export const getTotalPages = createSelector(
+  selectLikesState,
+  state => state.totalPages
+);
+
+export const getPageSize = createSelector(
+  selectLikesState,
+  state => state.pageSize
+);
+
+export const getPageNumber = createSelector(
+  selectLikesState,
+  state => state.pageNumber
+);

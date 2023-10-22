@@ -12,6 +12,7 @@ export interface State {
   loading: boolean;
   pageSize: number,
   pageNumber: number,
+  totalPages: number;
 }
 
 export const initialState: State = {
@@ -21,6 +22,7 @@ export const initialState: State = {
   loading: false,
   pageSize: 10,
   pageNumber: 1,
+  totalPages: 1,
 };
 
 export const likesReducer = createReducer(
@@ -32,8 +34,9 @@ export const likesReducer = createReducer(
 
   on(LikesActions.loadLikesSuccess, (state, action) => ({
     ...state,
-    data: state.data.length ? [...state.data, ...action.data.content] : [...action.data.content],
+    data: state.data.length && state.pageNumber > 1 ? [...state.data, ...action.data.content] : [...action.data.content],
     totalElements: action.data.size,
+    totalPages: action.data.totalPages || 1,
     error: null,
     loading: false,
   })),
@@ -46,8 +49,9 @@ export const likesReducer = createReducer(
 
   on(LikesActions.clearLikes, state => ({
     ...state,
-    data: [],
     totalElements: 0,
+    pageSize: 10,
+    pageNumber: 1,
     error: null,
   })),
 
@@ -62,6 +66,7 @@ export const likesReducer = createReducer(
     ...state,
     data: state.data.filter(({id}) => id !== userId),
     totalElements: 0,
+    totalPages: 1,
     error: null,
   })),
 );

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { LikesFacade } from './store/likes.facade';
 
 @Component({
@@ -6,25 +6,22 @@ import { LikesFacade } from './store/likes.facade';
   templateUrl: './like-list.component.html',
   styleUrls: ['./like-list.component.scss']
 })
-export class LikeListComponent implements OnInit {
+export class LikeListComponent implements OnInit, OnDestroy {
   likes$ = this.facade.likes$;
-  pageNumber = 1;
-  pageSize = 10;
 
   scrollDistance = 1.5;
   scrollUpDistance = 1.5;
-  throttle = 300;
+  throttle = 500;
 
   constructor(private readonly facade: LikesFacade) {}
 
   ngOnInit() {
     this.facade.clearLikes();
-    this.facade.loadLikes(this.pageSize, this.pageNumber)
+    this.facade.loadLikes();
   }
 
   onScroll() {
-    this.pageNumber++
-    this.facade.loadLikes(this.pageSize, this.pageNumber)
+    this.facade.onScroll();
   }
 
   ngOnDestroy() {

@@ -2,22 +2,45 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as LikesActions from './likes.actions';
 import * as LikesSelectors from './likes.selectors';
+import { combineLatest, filter, take } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class LikesFacade {
   likes$ = this.store.select(LikesSelectors.getLikesData);
   totalElements$ = this.store.select(LikesSelectors.getLikesTotalElements);
   error$ = this.store.select(LikesSelectors.getLikesError);
+  totalPages$ = this.store.select(LikesSelectors.getTotalPages);
+  pageSize$ = this.store.select(LikesSelectors.getPageSize);
+  pageNumber$ = this.store.select(LikesSelectors.getPageNumber);
 
-  constructor(private store: Store) {}
+  constructor(private store: Store) {
+  }
 
-  loadLikes(pageSize: number, pageNumber: number) {
-    this.store.dispatch(LikesActions.setPageSize({ pageSize }));
-    this.store.dispatch(LikesActions.setPageNumber({ pageNumber }));
-    this.store.dispatch(LikesActions.loadLikes({ pageSize, pageNumber }));
+  loadLikes() {
+    combineLatest([
+      this.pageSize$,
+      this.pageNumber$,
+    ])
+      .pipe(take(1))
+      .subscribe(([pageSize, pageNumber]) => {
+        this.store.dispatch(LikesActions.loadLikes({pageSize, pageNumber}));
+      })
   }
 
   clearLikes() {
     this.store.dispatch(LikesActions.clearLikes());
+  }
+
+  onScroll() {
+    combineLatest([
+      this.totalPages$,
+      this.pageSize$,
+      this.pageNumber$,
+    ]).pipe(
+      take(1),
+      filter(([total, , pageNumber]) => total > 1 && pageNumber <= total)
+    ).subscribe(([, pageSize, pageNumber]) => {
+      this.store.dispatch(LikesActions.loadLikes({pageSize, pageNumber: ++pageNumber}));
+    });
   }
 }

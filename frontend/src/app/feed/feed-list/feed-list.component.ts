@@ -8,12 +8,10 @@ import { FeedFacade } from './store/feed.facade';
 })
 export class FeedListComponent implements OnInit, OnDestroy {
   feed$ = this.facade.feed$;
-  pageNumber = 1;
-  pageSize = 10;
 
   scrollDistance = 1.5;
   scrollUpDistance = 1.5;
-  throttle = 300;
+  throttle = 500;
 
   constructor(
     private facade: FeedFacade,
@@ -22,12 +20,11 @@ export class FeedListComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.facade.clearFeed();
-    this.facade.loadFeed(this.pageSize, this.pageNumber)
+    this.facade.loadFeed()
   }
 
   onScroll() {
-    this.pageNumber++
-    this.facade.loadFeed(this.pageSize, this.pageNumber)
+    this.facade.onScroll();
   }
 
   ngOnDestroy() {

@@ -32,3 +32,8 @@ export const getLoading = createSelector(
   getFeedState,
   (state: State) => state.loading
 );
+
+export const getTotalPages = createSelector(
+  getFeedState,
+  (state: State) => state.totalPages
+);

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as FeedActions from './feed.actions';
 import * as FeedSelectors from './feed.selectors';
+import { combineLatest, filter, take } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class FeedFacade {
@@ -11,13 +12,19 @@ export class FeedFacade {
   pageSize$ = this.store.select(FeedSelectors.getFeedPageSize);
   pageNumber$ = this.store.select(FeedSelectors.getFeedPageNumber);
   error$ = this.store.select(FeedSelectors.getFeedError);
+  totalPages$ = this.store.select(FeedSelectors.getTotalPages);
 
   constructor(private store: Store) {}
 
-  loadFeed(pageSize: number, pageNumber: number) {
-    this.store.dispatch(FeedActions.setPageSize({ pageSize }));
-    this.store.dispatch(FeedActions.setPageNumber({ pageNumber }));
-    this.store.dispatch(FeedActions.loadFeed({ pageSize, pageNumber }));
+  loadFeed() {
+    combineLatest([
+      this.pageSize$,
+      this.pageNumber$,
+    ]).pipe(
+      take(1)
+    ).subscribe(([pageSize, pageNumber]) => {
+      this.store.dispatch(FeedActions.loadFeed({ pageSize, pageNumber }));
+    })
   }
 
   setPageSize(pageSize: number) {
@@ -29,7 +36,19 @@ export class FeedFacade {
   }
 
   clearFeed() {
-    console.log('clear feed');
     this.store.dispatch(FeedActions.clearFeed());
+  }
+
+  onScroll() {
+    combineLatest([
+      this.totalPages$,
+      this.pageSize$,
+      this.pageNumber$,
+    ]).pipe(
+      take(1),
+      filter(([total, , pageNumber]) => total > 1 && pageNumber <= total)
+    ).subscribe(([, pageSize, pageNumber]) => {
+      this.store.dispatch(FeedActions.loadFeed({ pageSize, pageNumber: ++pageNumber }));
+    });
   }
 }

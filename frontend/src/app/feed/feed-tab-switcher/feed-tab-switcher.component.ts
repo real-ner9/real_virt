@@ -25,7 +25,6 @@ export class FeedTabSwitcherComponent implements OnInit, OnDestroy {
   }
 
   setActiveTabIndex(url: string) {
-    console.log(url);
     if (url.includes('list')) {
       this.tabGroup.selectedIndex = 0;
     } else if (url.includes('likes')) {
