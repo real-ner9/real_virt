@@ -98,3 +98,24 @@
   display: flex;
   justify-content: center;
 }
+
+.chips {
+  margin-top: 10px;
+
+  ::ng-deep {
+    .mat-mdc-standard-chip .mdc-evolution-chip__action--primary {
+      padding: 0 10px;
+    }
+
+    .mat-mdc-chip.mat-mdc-standard-chip {
+      --mdc-chip-container-height: 24px;
+      border-radius: 25px;
+      border: 1px solid #515167;
+      background: #2E2E33;
+    }
+
+    .mat-mdc-standard-chip .mdc-evolution-chip__text-label {
+      @include text-base();
+    }
+  }
+}

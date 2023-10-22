@@ -17,6 +17,7 @@ import { feedReducer } from './feed-list/store/feed.reducer';
 import { FeedEffects } from './feed-list/store/feed.effects';
 import { likesReducer } from './like-list/store/likes.reducer';
 import { LikesEffects } from './like-list/store/likes.effects';
+import { MatChipsModule } from '@angular/material/chips';
 
 @NgModule({
   declarations: [
@@ -38,6 +39,7 @@ import { LikesEffects } from './like-list/store/likes.effects';
     EffectsModule.forFeature([FeedEffects]),
     StoreModule.forFeature('likes', likesReducer),
     EffectsModule.forFeature([LikesEffects]),
+    MatChipsModule,
   ]
 })
 export class FeedModule { }

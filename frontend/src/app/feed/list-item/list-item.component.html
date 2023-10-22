@@ -5,6 +5,14 @@
   <div class="statuses" *ngIf="value.online">
     <span class="online" *ngIf="value.online">В сети</span>
   </div>
+  <mat-chip-listbox class="chips">
+    <mat-chip *ngIf="value.age">
+      {{ value.age }}
+    </mat-chip>
+    <mat-chip color="primary" *ngIf="value.role">
+      {{ UserRoleMap[value.role] || value.role }}
+    </mat-chip>
+  </mat-chip-listbox>
   <div class="content" *ngIf="value.description">
     {{ value.description }}
   </div>
