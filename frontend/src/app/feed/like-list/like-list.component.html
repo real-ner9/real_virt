@@ -1,4 +1,11 @@
 <div class="items">
-  <app-feed-list-item page="likes" *ngFor="let item of [1,2,3,4,5,6]"></app-feed-list-item>
+  <app-feed-list-item page="likes" *ngFor="let item  of (likes$ | async)" [value]="item"></app-feed-list-item>
 </div>
+<div
+  infiniteScroll
+  [infiniteScrollDistance]="scrollDistance"
+  [infiniteScrollUpDistance]="scrollUpDistance"
+  [infiniteScrollThrottle]="throttle"
+  (scrolled)="onScroll()"
+></div>
 <app-background-for-switcher></app-background-for-switcher>

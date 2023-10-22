@@ -8,6 +8,7 @@ export interface State {
   pageSize: number;
   pageNumber: number;
   error: any;
+  loading: boolean;
 }
 
 export const initialState: State = {
@@ -15,19 +16,22 @@ export const initialState: State = {
   totalElements: 0,
   pageSize: 10,
   pageNumber: 1,
-  error: null
+  error: null,
+  loading: false,
 };
 
 export const feedReducer = createReducer(
   initialState,
+  on(FeedActions.loadFeed, (state) => ({ ...state, loading: true, })),
   on(FeedActions.loadFeedSuccess, (state, { page }) => ({
     ...state,
     data: state.data.length ? [...state.data, ...page.content] : [...page.content],
     pageNumber: page.number,
-    pageSize: page.size
+    pageSize: page.size,
+    loading: false,
   })),
   on(FeedActions.setPageSize, (state, { pageSize }) => ({ ...state, pageSize })),
   on(FeedActions.setPageNumber, (state, { pageNumber }) => ({ ...state, pageNumber })),
-  on(FeedActions.loadFeedFailure, (state, { error }) => ({ ...state, error })),
+  on(FeedActions.loadFeedFailure, (state, { error }) => ({ ...state, error, loading: false, })),
   on(FeedActions.clearFeed, (state) => ({ ...state, pageSize: 10, pageNumber: 1, data: [], })),
 );

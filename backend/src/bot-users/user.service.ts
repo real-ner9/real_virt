@@ -851,4 +851,56 @@ export class UserService {
       pageNumber,
     });
   }
+
+  async getUsersWhoLikedMe(
+    userId: string | number,
+    pageSize: number,
+    pageNumber: number,
+  ): Promise<Page<User>> {
+    userId = `${userId}`;
+    const baseQuery = this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect(
+        Like,
+        'likedMe',
+        '(likedMe.user_id = user.userId AND likedMe.likedUserId = :userId)',
+        { userId },
+      )
+      .leftJoinAndSelect(
+        Like,
+        'iLiked',
+        '(iLiked.user_id = :userId AND iLiked.likedUserId = user.userId)',
+        { userId },
+      )
+      .leftJoinAndSelect(
+        Dislike,
+        'dislike',
+        '(dislike.user_id = :userId AND dislike.dislikedUserId = user.userId)',
+        { userId },
+      )
+      .where('user.userId != :userId')
+      .andWhere('user.isBlocked = false')
+      .andWhere('user.isVisibleToOthers = true')
+      .andWhere('dislike.id IS NULL')
+      .andWhere('likedMe.id IS NOT NULL')
+      .andWhere('iLiked.id IS NULL')
+      .orderBy('likedMe.id', 'DESC');
+
+    // Получение пользователей с учетом пагинации
+    const users = await baseQuery
+      .skip((pageNumber - 1) * pageSize)
+      .take(pageSize)
+      .getMany();
+
+    // Получение общего количества пользователей, которые лайкнули текущего пользователя
+    const total = await baseQuery.getCount();
+
+    // Возвращение пользователей вместе с пагинационной информацией
+    return paginate<User>({
+      list: users,
+      totalElements: total,
+      pageSize,
+      pageNumber,
+    });
+  }
 }

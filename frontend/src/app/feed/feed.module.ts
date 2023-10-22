@@ -15,6 +15,8 @@ import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { feedReducer } from './feed-list/store/feed.reducer';
 import { FeedEffects } from './feed-list/store/feed.effects';
+import { likesReducer } from './like-list/store/likes.reducer';
+import { LikesEffects } from './like-list/store/likes.effects';
 
 @NgModule({
   declarations: [
@@ -34,6 +36,8 @@ import { FeedEffects } from './feed-list/store/feed.effects';
     NgOptimizedImage,
     StoreModule.forFeature('feed', feedReducer),
     EffectsModule.forFeature([FeedEffects]),
+    StoreModule.forFeature('likes', likesReducer),
+    EffectsModule.forFeature([LikesEffects]),
   ]
 })
 export class FeedModule { }

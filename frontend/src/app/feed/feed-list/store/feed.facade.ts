@@ -6,6 +6,7 @@ import * as FeedSelectors from './feed.selectors';
 @Injectable({ providedIn: 'root' })
 export class FeedFacade {
   feed$ = this.store.select(FeedSelectors.getFeedData);
+  loading$ = this.store.select(FeedSelectors.getLoading);
   totalElements$ = this.store.select(FeedSelectors.getFeedTotalElements);
   pageSize$ = this.store.select(FeedSelectors.getFeedPageSize);
   pageNumber$ = this.store.select(FeedSelectors.getFeedPageNumber);

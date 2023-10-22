@@ -44,4 +44,15 @@ export class UserService {
       },
     });
   }
+
+  getUsersWhoLikedMe(params: { pageSize: number, pageNumber: number }) {
+    return this.http.get<Page<User>>(`${this.path}/liked-me`, {
+      observe: 'body',
+      responseType: 'json',
+      params: {
+        pageSize: params.pageSize || 10,
+        pageNumber: params.pageNumber || 1,
+      },
+    });
+  }
 }

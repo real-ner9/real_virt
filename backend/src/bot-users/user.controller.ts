@@ -62,6 +62,25 @@ export class UserController {
     }
   }
 
+  @Get('liked-me')
+  async getUsersWhoLikedMe(
+    @Req() req: Request,
+    @Query('pageSize') pageSize: number = 10,
+    @Query('pageNumber') pageNumber: number = 1,
+  ) {
+    const authString = req.headers['authorization'];
+    const { id } = this.getUser(authString);
+    try {
+      return await this.userService.getUsersWhoLikedMe(
+        id,
+        pageSize,
+        pageNumber,
+      );
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   getUser(authString: string): TgUser | null {
     const data = new URLSearchParams(authString);
     const userData = data.get('user');

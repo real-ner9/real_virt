@@ -27,3 +27,8 @@ export const getFeedPageNumber = createSelector(
   getFeedState,
   (state: State) => state.pageNumber
 );
+
+export const getLoading = createSelector(
+  getFeedState,
+  (state: State) => state.loading
+);
