@@ -40,6 +40,8 @@ services:
       context: ../../frontend
       dockerfile: Dockerfile
     container_name: go_to_virt_frontend
+    volumes:
+      - frontend-dist:/usr/share/nginx/html
     networks:
       - go_to_virt
 
@@ -48,6 +50,7 @@ services:
     image: nginx:alpine
     container_name: nginx
     volumes:
+      - frontend-dist:/usr/share/nginx/html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./server.crt:/etc/nginx/server.crt
       - ./server.key:/etc/nginx/server.key
