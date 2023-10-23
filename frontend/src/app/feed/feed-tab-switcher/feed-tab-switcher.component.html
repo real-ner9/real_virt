@@ -7,12 +7,16 @@
     <ng-template mat-tab-label>
       <div class="tab-label-container" [class.active]="activeLinkIndex === 0">Лента</div>
     </ng-template>
-    <router-outlet></router-outlet>
+    <ng-template matTabContent>
+      <router-outlet></router-outlet>
+    </ng-template>
   </mat-tab>
   <mat-tab>
     <ng-template mat-tab-label>
       <div class="tab-label-container" [class.active]="activeLinkIndex === 1">Тебя лайкнули</div>
     </ng-template>
-    <router-outlet></router-outlet>
+    <ng-template matTabContent>
+      <router-outlet></router-outlet>
+    </ng-template>
   </mat-tab>
 </mat-tab-group>
