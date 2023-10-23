@@ -64,6 +64,8 @@ services:
 volumes:
   go_to_virt_db:
     name: go_to_virt_db
+  frontend-dist:
+    name: frontend-dist
 
 
 networks:
