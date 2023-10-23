@@ -3,7 +3,7 @@ FROM node:18 AS angular_build
 
 # Установка рабочего каталога
 WORKDIR /app
-COPY ./frontend /app
+COPY ../frontend /app
 
 # Установка зависимостей и сборка проекта
 RUN npm ci
