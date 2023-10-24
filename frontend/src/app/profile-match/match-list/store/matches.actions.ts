@@ -43,4 +43,7 @@ export const cancelRequestMatchFailure = createAction(
 export const matchRequested = createAction('[Matches] Match Requested', props<{ user: User }>());
 export const matchRequestCanceled = createAction('[Matches] Match Request Canceled', props<{ user: User }>());
 
+export const requestCanceled = createAction('[Matches] Request Canceled', props<{ user: User }>());
+
+
 

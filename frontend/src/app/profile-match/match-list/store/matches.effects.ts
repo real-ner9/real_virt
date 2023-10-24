@@ -56,6 +56,13 @@ export class MatchesEffects {
     )
   );
 
+  requestCanceled$ = createEffect(() =>
+    this.socketService.onRequestCanceled().pipe(
+      map(user => matchesActions.requestCanceled({ user })),
+      catchError(error => of(matchesActions.loadMatchesFailure({ error })))  // или другой action для обработки ошибок
+    )
+  );
+
   constructor(
     private actions$: Actions,
     private userService: UserService,

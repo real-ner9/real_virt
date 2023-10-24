@@ -4,7 +4,7 @@ import {
   loadMatchesSuccess,
   loadMatchesFailure,
   addMatch,
-  removeMatch, requestMatch, cancelRequestMatch, matchRequested, matchRequestCanceled
+  removeMatch, requestMatch, cancelRequestMatch, matchRequested, matchRequestCanceled, requestCanceled
 } from './matches.actions';
 import { Match } from '../../../shared/models/match';
 
@@ -42,6 +42,14 @@ export const matchesReducer = createReducer(
     matches: state.matches.map(match => ({
       ...match,
       chatRequested: match.id === id ? false : match.chatRequested
+    })),
+  })),
+
+  on(requestCanceled, (state, { user }) => ({
+    ...state,
+    matches: state.matches.map(match => ({
+      ...match,
+      chatRequested: match.id === user.id ? false : match.chatRequested
     })),
   })),
 
