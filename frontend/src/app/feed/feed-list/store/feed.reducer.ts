@@ -36,5 +36,5 @@ export const feedReducer = createReducer(
   on(FeedActions.setPageSize, (state, { pageSize }) => ({ ...state, pageSize })),
   on(FeedActions.setPageNumber, (state, { pageNumber }) => ({ ...state, pageNumber })),
   on(FeedActions.loadFeedFailure, (state, { error }) => ({ ...state, error, loading: false, })),
-  on(FeedActions.clearFeed, (state) => ({ ...state, pageSize: 10, pageNumber: 1, totalPages: 1, })),
+  on(FeedActions.clearFeed, (state) => ({ ...state, pageSize: 10, pageNumber: 1, totalPages: 1, data: [], })),
 );

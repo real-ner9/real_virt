@@ -4,6 +4,7 @@ import { Match } from '../../../shared/models/match';
 import { User } from '../../../shared/models/user';
 
 export const loadMatches = createAction('[Matches] Load Matches');
+export const clearMatches = createAction('[Matches] Clear Matches');
 export const loadMatchesSuccess = createAction('[Matches] Load Matches Success', props<{ matches: Page<Match> }>());
 export const loadMatchesFailure = createAction('[Matches] Load Matches Failure', props<{ error: any }>());
 

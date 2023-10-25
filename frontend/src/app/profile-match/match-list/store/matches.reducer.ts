@@ -4,7 +4,7 @@ import {
   loadMatchesSuccess,
   loadMatchesFailure,
   addMatch,
-  removeMatch, requestMatch, cancelRequestMatch, matchRequested, matchRequestCanceled, requestCanceled
+  removeMatch, requestMatch, cancelRequestMatch, matchRequested, matchRequestCanceled, requestCanceled, clearMatches
 } from './matches.actions';
 import { Match } from '../../../shared/models/match';
 
@@ -24,6 +24,7 @@ export const matchesReducer = createReducer(
   initialMatchesState,
   on(loadMatches, state => ({ ...state, loading: true })),
   on(loadMatchesSuccess, (state, { matches }) => ({ ...state, matches: [...matches.content], loading: false })),
+  on(clearMatches, (state) => ({ ...state, matches: [], loading: false })),
   on(loadMatchesFailure, (state, { error }) => ({ ...state, error, loading: false })),
   on(addMatch, (state, { match, hasPartnerLikedUser }) => ({
     ...state,

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RequestsFacade } from './store/requests.facade';
 
 @Component({
@@ -6,7 +6,7 @@ import { RequestsFacade } from './store/requests.facade';
   templateUrl: './request-list.component.html',
   styleUrls: ['./request-list.component.scss']
 })
-export class RequestListComponent {
+export class RequestListComponent implements OnInit, OnDestroy {
   requests$ = this.requestsFacade.requests$;
   loading$ = this.requestsFacade.loading$;
   error$ = this.requestsFacade.error$;
@@ -27,5 +27,9 @@ export class RequestListComponent {
 
   onCancel(id: number) {
     this.requestsFacade.cancelRequest(id);
+  }
+
+  ngOnDestroy() {
+    this.requestsFacade.clearRequests();
   }
 }

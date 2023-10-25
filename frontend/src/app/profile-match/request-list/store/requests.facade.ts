@@ -11,11 +11,15 @@ export class RequestsFacade {
   loading$: Observable<boolean> = this.store.pipe(select(RequestsSelectors.selectLoading));
   error$: Observable<any> = this.store.pipe(select(RequestsSelectors.selectError));
 
+  constructor(private store: Store) {}
+
   loadRequests() {
     this.store.dispatch(RequestsActions.loadRequests());
   }
 
-  constructor(private store: Store) {}
+  clearRequests() {
+    this.store.dispatch(RequestsActions.clearRequests());
+  }
 
   addRequest(request: User) {
     this.store.dispatch(RequestsActions.addRequest({ request }));

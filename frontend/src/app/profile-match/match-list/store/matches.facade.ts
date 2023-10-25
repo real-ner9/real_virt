@@ -15,6 +15,10 @@ export class MatchesFacade {
     this.store.dispatch(MatchesActions.loadMatches());
   }
 
+  clearMatches() {
+    this.store.dispatch(MatchesActions.clearMatches());
+  }
+
   constructor(private store: Store) {}
 
   removeMatch(matchId: number) {

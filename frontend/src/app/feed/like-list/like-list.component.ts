@@ -12,7 +12,6 @@ export class LikeListComponent implements OnInit, OnDestroy {
   constructor(private readonly facade: LikesFacade) {}
 
   ngOnInit() {
-    this.facade.clearLikes();
     this.facade.loadLikes();
   }
 

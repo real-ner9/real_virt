@@ -53,6 +53,7 @@ export const likesReducer = createReducer(
     pageSize: 10,
     pageNumber: 1,
     error: null,
+    data: [],
   })),
 
   on(LikesActions.like, (state, { userId }) => ({

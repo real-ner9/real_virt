@@ -1,6 +1,6 @@
 <ng-container *ngIf="!error; else errorBlock">
-<!--  Привет , {{ user.first_name }} {{ user.last_name }} решил подрочить?-->
   <app-main-tab-switcher></app-main-tab-switcher>
+  <router-outlet></router-outlet>
 </ng-container>
 <ng-template #errorBlock>
   Упс, ты не авторизовался <br>

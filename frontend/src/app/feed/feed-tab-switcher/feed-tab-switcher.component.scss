@@ -56,10 +56,15 @@
       .mdc-tab {
         padding: 0;
         min-width: auto;
+        height: fit-content;
       }
 
       .mat-mdc-tab-ripple {
         border-radius: 15px;
+      }
+
+      .mat-mdc-tab-links {
+        gap: 4px;
       }
     }
   }

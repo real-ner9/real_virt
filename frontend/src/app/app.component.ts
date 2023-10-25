@@ -95,7 +95,6 @@ export class AppComponent implements OnDestroy {
           .onAction()
           .pipe(takeUntil(this.destroy$))
           .subscribe(() => {
-            console.log('onActiooon');
             this.router.navigate([hasPartnerLikedUser ? '/matches/list' : '/feed/likes']);
           });
       })

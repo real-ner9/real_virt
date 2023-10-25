@@ -14,7 +14,6 @@ export class FeedListComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.facade.clearFeed();
     this.facade.loadFeed();
   }
 

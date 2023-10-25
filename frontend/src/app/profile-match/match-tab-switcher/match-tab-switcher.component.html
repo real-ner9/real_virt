@@ -1,22 +1,18 @@
-<mat-tab-group
-  #tabGroup
-  class="match-tab-switcher"
-  (selectedTabChange)="onTabChange($event)"
-  [selectedIndex]="activeLinkIndex">
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <div class="tab-label-container" [class.active]="activeLinkIndex === 0">Мэтчи</div>
-    </ng-template>
-    <ng-template matTabContent>
-      <router-outlet></router-outlet>
-    </ng-template>
-  </mat-tab>
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <div class="tab-label-container" [class.active]="activeLinkIndex === 1">Приглашения</div>
-    </ng-template>
-    <ng-template matTabContent>
-      <router-outlet></router-outlet>
-    </ng-template>
-  </mat-tab>
-</mat-tab-group>
+<div class="match-tab-switcher">
+  <nav mat-tab-nav-bar>
+    <a mat-tab-link
+       *ngFor="let link of navLinks"
+       [routerLink]="link.link"
+       routerLinkActive
+       #rla="routerLinkActive"
+       [disabled]="!!link.disabled"
+       [active]="rla.isActive">
+      <div [class.active]="rla.isActive" class="tab-label-container">
+        <span class="tab-label tab-label_{{link.labelKey}}">
+          {{ link.label }}
+        </span>
+      </div>
+    </a>
+  </nav>
+</div>
+

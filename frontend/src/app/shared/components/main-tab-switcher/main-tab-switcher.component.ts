@@ -1,18 +1,14 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-main-tab-switcher',
   templateUrl: './main-tab-switcher.component.html',
   styleUrls: ['./main-tab-switcher.component.scss']
 })
-export class MainTabSwitcherComponent implements OnInit {
+export class MainTabSwitcherComponent {
   title = 'angular-material-tab-router';
   navLinks: any[];
-  activeLinkIndex = -1;
-  constructor(private router: Router) {
+  constructor() {
     this.navLinks = [
       {
         label: 'Мэтчи',
@@ -37,10 +33,5 @@ export class MainTabSwitcherComponent implements OnInit {
         icon: 'settings',
       },
     ];
-  }
-  ngOnInit(): void {
-    this.router.events.subscribe((res) => {
-      this.activeLinkIndex = this.navLinks.indexOf(this.navLinks.find(tab => tab.link === '.' + this.router.url));
-    });
   }
 }

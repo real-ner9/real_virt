@@ -3,6 +3,7 @@ import { Page } from '../../../shared/models/page';
 import { User } from '../../../shared/models/user';
 
 export const loadRequests = createAction('[Requests] Load Requests');
+export const clearRequests = createAction('[Requests] Clear Requests');
 export const loadRequestsSuccess = createAction('[Requests] Load Requests Success', props<{ requests: Page<User> }>());
 export const loadRequestsFailure = createAction('[Requests] Load Requests Failure', props<{ error: any }>());
 

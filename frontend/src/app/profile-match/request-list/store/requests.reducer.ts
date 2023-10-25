@@ -4,7 +4,7 @@ import {
   loadRequestsSuccess,
   loadRequestsFailure,
   addRequest,
-  cancelRequest, approveRequest, requestApproved, requestCanceled, approveRequestSuccess,
+  cancelRequest, approveRequest, requestApproved, requestCanceled, approveRequestSuccess, clearRequests,
 } from './requests.actions';
 import { User } from '../../../shared/models/user';
 import { matchRequestCanceled, matchRequested } from '../../match-list/store/matches.actions';
@@ -26,6 +26,7 @@ export const requestsReducer = createReducer(
   initialRequestsState,
   on(loadRequests, state => ({ ...state, loading: true })),
   on(loadRequestsSuccess, (state, { requests }) => ({ ...state, requests: [...requests.content], loading: false })),
+  on(clearRequests, (state) => ({ ...state, requests: [], loading: false })),
   on(loadRequestsFailure, (state, { error }) => ({ ...state, error, loading: false })),
   on(addRequest, (state, { request }) => ({ ...state, requests: [...state.requests, request] })),
   on(cancelRequest, (state, { requestId }) => ({

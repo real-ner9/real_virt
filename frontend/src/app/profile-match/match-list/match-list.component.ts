@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatchesFacade } from './store/matches.facade';
 
 @Component({
@@ -6,7 +6,7 @@ import { MatchesFacade } from './store/matches.facade';
   templateUrl: './match-list.component.html',
   styleUrls: ['./match-list.component.scss']
 })
-export class MatchListComponent implements OnInit {
+export class MatchListComponent implements OnInit, OnDestroy {
   matches$ = this.matchesFacade.matches$;
   loading$ = this.matchesFacade.loading$;
   error$ = this.matchesFacade.error$;
@@ -27,5 +27,9 @@ export class MatchListComponent implements OnInit {
 
   onCancelRequest(id: number) {
     this.matchesFacade.cancelRequestMatch(id);
+  }
+
+  ngOnDestroy() {
+    this.matchesFacade.clearMatches();
   }
 }
