@@ -2,7 +2,7 @@ FROM node:18 as angular_build
 WORKDIR /app
 COPY . /app
 RUN npm ci
-RUN npm run build -- --output-path=./dist/frontend
+RUN npm run build --prod --output-path=./dist/frontend
 
 # Этап размещения
 FROM nginx:alpine
