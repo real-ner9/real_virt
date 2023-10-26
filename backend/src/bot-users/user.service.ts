@@ -17,6 +17,22 @@ export type UserFlag = 'all' | 'activeRoom' | 'currentPartner';
 export class UserService {
   // deleteDelay in minutes
   deleteDelay = 30 * 60 * 1000;
+  showedFeedParams = [
+    'user.id',
+    'user.currentPartner',
+    'user.age',
+    'user.online',
+    'user.name',
+    'user.role',
+    'user.photoUrl',
+    'user.description',
+    'user.lastLoginTimestamp',
+  ];
+  showedMatchParams = [
+    ...this.showedFeedParams,
+    'user.username',
+    'user.showUsername',
+  ];
 
   // Initialize user cache
   userCache: Record<string, User> = {};
@@ -760,15 +776,17 @@ export class UserService {
       relations: ['user'],
     });
 
-    await this.connectionRepository.remove(connection);
+    if (connection) {
+      await this.connectionRepository.remove(connection);
 
-    const activeConnections = await this.connectionRepository.count({
-      where: { user: { id: connection.user.id } },
-    });
+      const activeConnections = await this.connectionRepository.count({
+        where: { user: { id: connection.user.id } },
+      });
 
-    if (activeConnections === 0 && connection.user) {
-      connection.user.online = false;
-      await this.userRepository.save(connection.user);
+      if (activeConnections === 0 && connection.user) {
+        connection.user.online = false;
+        await this.userRepository.save(connection.user);
+      }
     }
   }
 
@@ -776,6 +794,7 @@ export class UserService {
     userId = `${userId}`;
     const baseQuery = this.userRepository
       .createQueryBuilder('user')
+      .select(this.showedMatchParams)
       .leftJoinAndSelect('user.receivedRequests', 'receivedRequest')
       .leftJoinAndSelect('receivedRequest.sender', 'sender')
       .leftJoinAndSelect('receivedRequest.receiver', 'receiver')
@@ -822,14 +841,17 @@ export class UserService {
     const total = await baseQuery.getCount();
 
     // Добавляем поле, показывающее, был ли отправлен запрос на чат
-    const enhancedUsers = users.map(({ receivedRequests, ...user }) => ({
-      ...user,
-      chatRequested: !!(
-        receivedRequests &&
-        receivedRequests?.length &&
-        receivedRequests.find(({ sender }) => sender.userId === userId)
-      ),
-    }));
+    const enhancedUsers = users.map(
+      ({ receivedRequests, showUsername, username, ...user }) => ({
+        ...user,
+        username: showUsername ? username : null,
+        chatRequested: !!(
+          receivedRequests &&
+          receivedRequests?.length &&
+          receivedRequests.find(({ sender }) => sender.userId === userId)
+        ),
+      }),
+    );
 
     return paginate({
       list: enhancedUsers,
@@ -843,6 +865,7 @@ export class UserService {
     userId = `${userId}`;
     const users = await this.userRepository
       .createQueryBuilder('user')
+      .select(this.showedMatchParams)
       .innerJoinAndSelect(
         'user.sentRequests',
         'chatRequest',
@@ -863,8 +886,13 @@ export class UserService {
       .orderBy('chatRequest.requestedAt', 'DESC')
       .getCount();
 
+    const enhancedUsers = users.map(({ showUsername, username, ...user }) => ({
+      ...user,
+      username: showUsername ? username : null,
+    }));
+
     return paginate<User>({
-      list: users,
+      list: enhancedUsers,
       totalElements: total,
       pageSize: 1,
       pageNumber: 1,
@@ -879,23 +907,26 @@ export class UserService {
     userId = `${userId}`;
     const baseQuery = this.userRepository
       .createQueryBuilder('user')
+      .select(this.showedFeedParams)
       .leftJoin(
         Like,
         'like',
-        'like.user_id = :userId AND like.likedUserId = user.userId',
+        '(like.user_id = :userId AND like.likedUserId = user.userId)',
         { userId },
       )
       .leftJoinAndSelect(
         Dislike,
         'dislike',
-        'dislike.user_id = :userId AND dislike.dislikedUserId = user.userId',
+        '(dislike.user_id = :userId AND dislike.dislikedUserId = user.userId)',
         { userId },
       )
-      .where('user.userId != :userId')
-      .andWhere('user.isBlocked = false')
-      .andWhere('user.isVisibleToOthers = true')
-      .andWhere('dislike.id IS NULL')
-      .andWhere('like.id IS NULL');
+      .where('(user.userId != :userId)')
+      .andWhere('(user.isBlocked = false)')
+      .andWhere('(user.isVisibleToOthers = true)')
+      .andWhere('(dislike.id IS NULL)')
+      .andWhere('(like.id IS NULL)')
+      .addOrderBy('user.lastLoginTimestamp', 'DESC')
+      .addOrderBy('user.photoUrl', 'ASC');
 
     // Получение пользователей с учетом пагинации
     const users = await baseQuery
@@ -923,6 +954,7 @@ export class UserService {
     userId = `${userId}`;
     const baseQuery = this.userRepository
       .createQueryBuilder('user')
+      .select(this.showedFeedParams)
       .leftJoinAndSelect(
         Like,
         'likedMe',
@@ -1071,6 +1103,33 @@ export class UserService {
       }
 
       return { user, partner, hasPartners };
+    }
+  }
+
+  async getLastLoginTimestamp(userId: string): Promise<number | null> {
+    const user = await this.getUserFromCacheOrDB(userId);
+    return user?.lastLoginTimestamp || null;
+  }
+
+  async setLastLoginTimestamp(userId: string | number) {
+    userId = `${userId}`;
+    const user = await this.getUserFromCacheOrDB(userId);
+
+    if (user) {
+      const now = Date.now();
+      const debounce = 30 * 60 * 1000;
+
+      // если обновлялось меньше чем 30 минут назад, то не обновляем
+      // сделано для того, чтобы в feed не скакали записи
+      if (
+        !user.lastLoginTimestamp ||
+        now - user.lastLoginTimestamp > debounce
+      ) {
+        user.lastLoginTimestamp = now;
+
+        await this.userRepository.save(user);
+        this.updateCache(user);
+      }
     }
   }
 }

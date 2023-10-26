@@ -2,7 +2,7 @@
   <div class="name-container">
     <span class="name">{{ value.name }}</span>
     <a
-      *ngIf="value.username && value.showUsername"
+      *ngIf="value.username"
       [href]="'https://t.me/' + value.username"
       target="_blank" class="tg-link">
       @{{ value.username }}

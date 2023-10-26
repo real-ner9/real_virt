@@ -88,6 +88,9 @@ export class User {
   @Column({ default: false })
   online: boolean;
 
+  @Column({ type: 'bigint', nullable: true })
+  lastLoginTimestamp: number;
+
   /**
    * Отношение к таблице ChatRequest, где текущий пользователь является отправителем запроса на чат.
    * Это позволяет получить все запросы на чат, отправленные этим пользователем.
@@ -123,5 +126,6 @@ export class User {
     this.name = null;
     this.username = null;
     this.showUsername = false;
+    this.lastLoginTimestamp = null;
   }
 }
