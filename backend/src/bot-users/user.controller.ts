@@ -86,6 +86,7 @@ export class UserController {
     const data = new URLSearchParams(authString);
     const userData = data.get('user');
 
+    console.log('userdata', userData);
     return userData ? JSON.parse(userData) : null;
   }
 }
