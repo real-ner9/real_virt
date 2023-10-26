@@ -11,11 +11,12 @@ import { checkSignature } from '../utils/check-signature';
 import { UserService } from './user.service';
 import { ProfileMatchActionsService } from '../profile-match/profile-match-actions.service';
 import { forwardRef, Inject } from '@nestjs/common';
+import * as process from 'process';
 
 @WebSocketGateway({
-  namespace: '/user',
+  namespace: '/api/user',
 
-  cors: { origin: '*', credentials: true },
+  cors: { origin: process.env.IS_PROD ? null : '*', credentials: true },
 })
 export class UsersWebSocketGateway
   implements OnGatewayConnection, OnGatewayDisconnect
