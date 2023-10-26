@@ -83,7 +83,9 @@ export class UserController {
   }
 
   getUser(authString: string): TgUser | null {
-    const data = new URLSearchParams(authString);
+    const actualDataString = authString.replace('twa-init-data ', '');
+    const data = new URLSearchParams(actualDataString);
+
     const userData = data.get('user');
 
     console.log('userdata', userData);
