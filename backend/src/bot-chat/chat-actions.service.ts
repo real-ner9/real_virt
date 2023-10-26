@@ -396,7 +396,7 @@ export class ChatActionsService {
 
     let browsingProfilesButton: any = Markup.button.webApp(
       '📄 Смотреть анкеты',
-      `${process.env.WEB_APP_URL}/feed`,
+      `${process.env.WEB_APP_URL}`,
     );
 
     if (!user || !user?.name) {
