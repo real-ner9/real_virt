@@ -14,7 +14,7 @@ import { forwardRef, Inject } from '@nestjs/common';
 import * as process from 'process';
 
 @WebSocketGateway({
-  namespace: '/api/user',
+  namespace: '/user',
 
   cors: { origin: '*', credentials: true },
 })

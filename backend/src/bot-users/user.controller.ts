@@ -16,6 +16,8 @@ export class UserController {
   async authorize(@Req() req: Request) {
     try {
       const authString = req.headers['authorization'];
+      console.log('authString', authString);
+      console.log('this.getUser(authString)', this.getUser(authString));
       const { id } = this.getUser(authString);
       await this.userService.setLastLoginTimestamp(id);
       return JSON.stringify({ status: 'COMPLETE' });
