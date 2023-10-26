@@ -1,12 +1,11 @@
-clean:
-	# Удаляем Docker images
-	docker rmi docker-go_to_virt_frontend || true
-	docker rmi docker-go_to_virt_app || true
+redeploy:
+	# Строим новые образы
+	COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker compose -f ./docker/docker-compose.yml build
 
-	# Удаляем Docker volume
-	docker volume rm frontend-dist || true
+	# Перезапускаем контейнеры с новыми образами
+	docker compose -f ./docker/docker-compose.yml up -d
 
-up: clean
+up:
 	COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker compose -f ./docker/docker-compose.yml up -d --build --remove-orphans
 
 down:
