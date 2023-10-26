@@ -55,7 +55,7 @@ export class ChatActionsService {
     this.bot = bot;
 
     cron.schedule(
-      '0 35 21 * * *',
+      '0 0 16 * * *',
       async () => {
         const activeUsers = await this.userService.getAllActiveUsers();
         const blockedUsers: string[] = [];
@@ -415,7 +415,7 @@ export class ChatActionsService {
       ],
       // [Markup.button.callback('📄 Смотреть анкеты', 'browsing_profiles')],
       [browsingProfilesButton],
-      [Markup.button.callback('✏️ Редактировать профиль', 'edit_profile')],
+      [Markup.button.callback('✏️ Редактировать анкету', 'edit_profile')],
     ];
 
     // if (hideNotificationButton) {
