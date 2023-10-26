@@ -55,7 +55,7 @@ export class ChatActionsService {
     this.bot = bot;
 
     cron.schedule(
-      '0 0 16 * * *',
+      '0 30 18 * * *',
       async () => {
         const activeUsers = await this.userService.getAllActiveUsers();
         const blockedUsers: string[] = [];
@@ -67,7 +67,7 @@ export class ChatActionsService {
             await this.bot.telegram
               .sendMessage(
                 user.userId,
-                '🌆 Вечер наступил, и мы так заждались тебя! Самое время завести интересный разговор в нашем чате. 🥳🌟',
+                '🌟 Внимание! 🌟\nВ нашем боте появилось новое приложение! Теперь всё стало ещё удобнее и красивее. Заполни свой профиль, добавь фотографию и просто нажми "смотреть анкеты".\nВнутри Telegram откроется приложение, которое выглядит гораздо приятнее, чем предыдущий поиск.\nЕсли обнаружишь ошибки или у тебя есть пожелания к функционалу, пожалуйста, напиши нам сюда: @vinloy\n 🚀🎉',
                 await this.getFindPartnerKeyboard(user.userId),
               )
               .then(async () => {
