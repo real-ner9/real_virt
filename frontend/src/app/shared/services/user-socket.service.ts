@@ -13,7 +13,7 @@ export class SocketService {
   private path = 'user'
 
   constructor() {
-    const authData = localStorage.getItem('authData');
+    const authData = sessionStorage.getItem('authData');
 
     this.socket = io(`${environment.socketUrl}/${this.path}`, { query: { authData }});
   }
