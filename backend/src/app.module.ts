@@ -39,7 +39,7 @@ import { FileStoreModule } from './file-store/file-store.module';
       synchronize: false,
       migrationsRun: true,
       migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
-      // logging: true,
+      logging: false,
     }),
     // MongooseModule.forRoot(
     //   'mongodb+srv://Cluster84278:WlhFQmdzQ2do@cluster84278.zywqkmq.mongodb.net/?appName=mongosh+1.10.5',

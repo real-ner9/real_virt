@@ -17,6 +17,7 @@ import { MatchesEffects } from './match-list/store/matches.effects';
 import { requestsReducer } from './request-list/store/requests.reducer';
 import { RequestsEffects } from './request-list/store/requests.effects';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatMenuModule } from '@angular/material/menu';
 
 
 @NgModule({
@@ -39,6 +40,7 @@ import { MatChipsModule } from '@angular/material/chips';
     EffectsModule.forFeature([RequestsEffects]),
     NgOptimizedImage,
     MatChipsModule,
+    MatMenuModule,
   ]
 })
 export class ProfileMatchModule { }

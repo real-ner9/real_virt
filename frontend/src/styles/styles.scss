@@ -35,3 +35,7 @@ body { margin: 0; font-family: $font-family; }
 button[disabled] {
   opacity: 0.3;
 }
+
+.mat-mdc-menu-content .mat-mdc-menu-item .mat-mdc-menu-item-text.mat-mdc-menu-item-text {
+  @include text-base();
+}

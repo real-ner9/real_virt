@@ -9,4 +9,5 @@ export type Icon = 'settings'
   | 'cancel'
   | 'like'
   | 'dislike'
+  | 'points'
   | null

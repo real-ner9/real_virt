@@ -7,6 +7,8 @@ import { UserLiked } from './user-liked.entity';
 import { Match } from './match.entity';
 import { Connection } from './connection.entity';
 import { ChatRequest } from './chat-request.entity';
+import { UserBlockEntity } from './user-block.entity';
+import { ComplaintType, UserComplaintEntity } from './user-complaint.entity';
 
 @Entity()
 export class User {
@@ -34,6 +36,8 @@ export class User {
   @Column({ type: 'text', nullable: false, unique: true })
   userId: string;
 
+  // Эта блокировка не связана с основной блокировкой
+  // она предназначена для того, когда челов сам блокирует бота
   @Column({ default: false })
   isBlocked: boolean;
 
@@ -64,6 +68,18 @@ export class User {
   @Column({ type: 'text', nullable: true })
   name: string;
 
+  @Column({ type: 'text', nullable: true })
+  username: string;
+
+  @Column({ default: false })
+  showUsername: boolean;
+
+  @Column({ default: false })
+  online: boolean;
+
+  @Column({ type: 'bigint', nullable: true })
+  lastLoginTimestamp: number;
+
   @OneToMany(() => Like, (like) => like.user)
   likes: Like[];
 
@@ -79,18 +95,6 @@ export class User {
   @OneToMany(() => Connection, (connection) => connection.user)
   connections: Connection[];
 
-  @Column({ type: 'text', nullable: true })
-  username: string;
-
-  @Column({ default: false })
-  showUsername: boolean;
-
-  @Column({ default: false })
-  online: boolean;
-
-  @Column({ type: 'bigint', nullable: true })
-  lastLoginTimestamp: number;
-
   /**
    * Отношение к таблице ChatRequest, где текущий пользователь является отправителем запроса на чат.
    * Это позволяет получить все запросы на чат, отправленные этим пользователем.
@@ -104,6 +108,20 @@ export class User {
    */
   @OneToMany(() => ChatRequest, (chatRequest) => chatRequest.receiver)
   receivedRequests: ChatRequest[];
+
+  // жалобы пользователя
+  @OneToMany(() => UserComplaintEntity, (userComplaint) => userComplaint.user)
+  complaints: UserComplaintEntity[];
+
+  // // юзер может заблокировать пользователя
+  @OneToMany(() => UserBlockEntity, (block) => block.user)
+  blocks: UserBlockEntity[];
+
+  @Column({ type: 'timestamp', nullable: true })
+  blockedUntil: Date | null;
+
+  @Column({ type: 'text', nullable: true })
+  blockReason: ComplaintType;
 
   constructor(userId: string) {
     this.userId = userId;
@@ -127,5 +145,7 @@ export class User {
     this.username = null;
     this.showUsername = false;
     this.lastLoginTimestamp = null;
+    this.blockedUntil = null;
+    this.blockReason = null;
   }
 }

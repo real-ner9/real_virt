@@ -10,6 +10,7 @@ import { Connection } from './schemas/connection.entity';
 import { ChatRequest } from './schemas/chat-request.entity';
 import { Page, paginate } from '../utils/paginate';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
+import { UserBlockEntity } from './schemas/user-block.entity';
 
 export type UserFlag = 'all' | 'activeRoom' | 'currentPartner';
 
@@ -48,6 +49,8 @@ export class UserService {
     private readonly connectionRepository: Repository<Connection>,
     @InjectRepository(ChatRequest)
     private readonly chatRequestRepository: Repository<ChatRequest>,
+    @InjectRepository(UserBlockEntity)
+    private readonly blockRepository: Repository<UserBlockEntity>,
   ) {
     setTimeout(async () => {
       await this.clearConnections();

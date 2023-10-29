@@ -1,13 +1,27 @@
 <div class="item" *ngIf="value">
-  <div class="name-container">
-    <span class="name">{{ value.name }}</span>
-    <a
-      *ngIf="value.username"
-      [href]="'https://t.me/' + value.username"
-      target="_blank" class="tg-link">
-      @{{ value.username }}
-    </a>
-  </div>
+  <header class="user-header">
+    <div class="name-container">
+      <span class="name">{{ value.name }}</span>
+      <a
+        *ngIf="value.username"
+        [href]="'https://t.me/' + value.username"
+        target="_blank" class="tg-link">
+        @{{ value.username }}
+      </a>
+    </div>
+    <button mat-button [matMenuTriggerFor]="menu"><app-icon icon="points"></app-icon></button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item>Убрать из мэтчей</button>
+      <button mat-menu-item [matMenuTriggerFor]="reasons">Пожаловаться</button>
+      <button mat-menu-item>Заблокировать</button>
+    </mat-menu>
+
+    <mat-menu #reasons="matMenu">
+      <button mat-menu-item>Неприемлемый контент</button>
+      <button mat-menu-item>Оскорбительное поведение</button>
+      <button mat-menu-item>Возрастное нарушение</button>
+    </mat-menu>
+  </header>
   <div class="statuses">
     <span class="online" *ngIf="value.online">В сети </span>
     <span class="hint" *ngIf="page === 'requests'">{{ value.online ? ' • м' : 'М' }}ожно принять приглашение в чат</span>

@@ -56,7 +56,7 @@ export class ChatActionsService {
     this.bot = bot;
 
     cron.schedule(
-      '0 20 2 * * *',
+      '0 0 16 * * *',
       async () => {
         const activeUsers = await this.userService.getAllActiveUsers();
         const blockedUsers: string[] = [];
@@ -68,7 +68,7 @@ export class ChatActionsService {
             await this.bot.telegram
               .sendMessage(
                 user.userId,
-                '🔞 Для создания анкеты: убедитесь, что вам 18+, избегайте недопустимого контента. Защитите свои интимные фото стикерами или размытием. Подробные правила здесь https://telegra.ph/Pravila-sozdaniya-ankety-v-GoToVirtBot-10-28. 🌟🚀🎉',
+                '🌆 Вечер наступил, и мы так заждались тебя! Самое время завести интересный разговор в нашем чате. 🥳🌟',
                 await this.getFindPartnerKeyboard(user.userId),
               )
               .then(async () => {

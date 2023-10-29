@@ -13,6 +13,8 @@ import { Connection } from './schemas/connection.entity';
 import { ChatRequest } from './schemas/chat-request.entity';
 import { ProfileMatchModule } from '../profile-match/profile-match.module';
 import { FileStoreModule } from '../file-store/file-store.module';
+import { UserBlockEntity } from './schemas/user-block.entity';
+import { UserComplaintEntity } from './schemas/user-complaint.entity';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { FileStoreModule } from '../file-store/file-store.module';
       Match,
       Connection,
       ChatRequest,
+      UserBlockEntity,
+      UserComplaintEntity,
     ]),
     ProfileMatchModule,
     FileStoreModule,
@@ -57,6 +61,14 @@ import { FileStoreModule } from '../file-store/file-store.module';
     {
       provide: 'CHAT_REQUEST_REPOSITORY',
       useValue: ChatRequest,
+    },
+    {
+      provide: 'BLOCK_REPOSITORY',
+      useValue: UserBlockEntity,
+    },
+    {
+      provide: 'USER_COMPLAINT_REPOSITORY',
+      useValue: UserComplaintEntity,
     },
     UserActionsService,
     UsersWebSocketGateway,
