@@ -7,8 +7,8 @@ import { UserLiked } from './user-liked.entity';
 import { Match } from './match.entity';
 import { Connection } from './connection.entity';
 import { ChatRequest } from './chat-request.entity';
-import { UserBlockEntity } from './user-block.entity';
-import { ComplaintType, UserComplaintEntity } from './user-complaint.entity';
+import { UserBlock } from './user-block.entity';
+import { ComplaintType, UserComplaint } from './user.complaint.entity';
 
 @Entity()
 export class User {
@@ -110,12 +110,12 @@ export class User {
   receivedRequests: ChatRequest[];
 
   // жалобы пользователя
-  @OneToMany(() => UserComplaintEntity, (userComplaint) => userComplaint.user)
-  complaints: UserComplaintEntity[];
+  @OneToMany(() => UserComplaint, (userComplaint) => userComplaint.user)
+  complaints: UserComplaint[];
 
   // // юзер может заблокировать пользователя
-  @OneToMany(() => UserBlockEntity, (block) => block.user)
-  blocks: UserBlockEntity[];
+  @OneToMany(() => UserBlock, (block) => block.user)
+  blocks: UserBlock[];
 
   @Column({ type: 'timestamp', nullable: true })
   blockedUntil: Date | null;

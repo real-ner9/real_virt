@@ -17,7 +17,7 @@ export enum ComplaintType {
 }
 
 @Entity()
-export class UserComplaintEntity {
+export class UserComplaint {
   @PrimaryGeneratedColumn()
   id: number;
 

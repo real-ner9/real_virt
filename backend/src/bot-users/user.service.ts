@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { IsNull, Not, Repository } from 'typeorm';
 import { User } from './schemas/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,7 +10,9 @@ import { Connection } from './schemas/connection.entity';
 import { ChatRequest } from './schemas/chat-request.entity';
 import { Page, paginate } from '../utils/paginate';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
-import { UserBlockEntity } from './schemas/user-block.entity';
+import { UserBlock } from './schemas/user-block.entity';
+import { ComplaintType, UserComplaint } from './schemas/user.complaint.entity';
+import { FileStoreService } from '../file-store/file-store.service';
 
 export type UserFlag = 'all' | 'activeRoom' | 'currentPartner';
 
@@ -49,8 +51,11 @@ export class UserService {
     private readonly connectionRepository: Repository<Connection>,
     @InjectRepository(ChatRequest)
     private readonly chatRequestRepository: Repository<ChatRequest>,
-    @InjectRepository(UserBlockEntity)
-    private readonly blockRepository: Repository<UserBlockEntity>,
+    @InjectRepository(UserBlock)
+    private readonly blockRepository: Repository<UserBlock>,
+    @InjectRepository(UserComplaint)
+    private readonly complaintRepository: Repository<UserComplaint>,
+    private readonly fileStoreService: FileStoreService,
   ) {
     setTimeout(async () => {
       await this.clearConnections();
@@ -838,6 +843,18 @@ export class UserService {
       .leftJoinAndSelect('receivedRequest.sender', 'sender')
       .leftJoinAndSelect('receivedRequest.receiver', 'receiver')
       .leftJoin(
+        UserBlock,
+        'blocksByMe',
+        '(blocksByMe.user_id = :userId AND blocksByMe.blockedUserId = user.userId)',
+        { userId },
+      )
+      .leftJoin(
+        UserBlock,
+        'blockedByOthers',
+        '(blockedByOthers.user_id = user.userId AND blockedByOthers.blockedUserId = :userId)',
+        { userId },
+      )
+      .leftJoin(
         Like,
         'likeOutgoing',
         '(likeOutgoing.user_id = :userId AND likeOutgoing.likedUserId = user.userId)',
@@ -867,6 +884,9 @@ export class UserService {
       .andWhere('dislike.id IS NULL')
       .andWhere('likeIncoming.id IS NOT NULL')
       .andWhere('likeOutgoing.id IS NOT NULL')
+      .andWhere('user.blockReason IS NULL')
+      .andWhere('blocksByMe.id IS NULL')
+      .andWhere('blockedByOthers.id IS NULL')
       .andWhere('sentRequest.id IS NULL') // исключаем пользователей, которые отправили запрос
       .orderBy(
         'CASE ' +
@@ -902,28 +922,34 @@ export class UserService {
 
   async getRequests(userId: number | string) {
     userId = `${userId}`;
-    const users = await this.userRepository
+    const baseQuery = this.userRepository
       .createQueryBuilder('user')
       .select(this.showedMatchParams)
+      .leftJoin(
+        UserBlock,
+        'blocksByMe',
+        '(blocksByMe.user_id = :userId AND blocksByMe.blockedUserId = user.userId)',
+        { userId },
+      )
+      .leftJoin(
+        UserBlock,
+        'blockedByOthers',
+        '(blockedByOthers.user_id = user.userId AND blockedByOthers.blockedUserId = :userId)',
+        { userId },
+      )
       .innerJoinAndSelect(
         'user.sentRequests',
         'chatRequest',
         'chatRequest.sender_id = user.userId',
       )
       .where('chatRequest.receiver_id = :userId', { userId })
-      .orderBy('chatRequest.requestedAt', 'DESC')
-      .getMany();
+      .andWhere('user.blockReason IS NULL')
+      .andWhere('blocksByMe.id IS NULL')
+      .andWhere('blockedByOthers.id IS NULL')
+      .orderBy('chatRequest.requestedAt', 'DESC');
+    const users = await baseQuery.getMany();
 
-    const total = await this.userRepository
-      .createQueryBuilder('user')
-      .innerJoinAndSelect(
-        'user.sentRequests',
-        'chatRequest',
-        'chatRequest.sender_id = user.userId',
-      )
-      .where('chatRequest.receiver_id = :userId', { userId })
-      .orderBy('chatRequest.requestedAt', 'DESC')
-      .getCount();
+    const total = await baseQuery.getCount();
 
     const enhancedUsers = users.map(({ showUsername, username, ...user }) => ({
       ...user,
@@ -948,6 +974,18 @@ export class UserService {
       .createQueryBuilder('user')
       .select(this.showedFeedParams)
       .leftJoin(
+        UserBlock,
+        'blocksByMe',
+        '(blocksByMe.user_id = :userId AND blocksByMe.blockedUserId = user.userId)',
+        { userId },
+      )
+      .leftJoin(
+        UserBlock,
+        'blockedByOthers',
+        '(blockedByOthers.user_id = user.userId AND blockedByOthers.blockedUserId = :userId)',
+        { userId },
+      )
+      .leftJoin(
         Like,
         'like',
         '(like.user_id = :userId AND like.likedUserId = user.userId)',
@@ -964,6 +1002,9 @@ export class UserService {
       .andWhere('(user.isVisibleToOthers = true)')
       .andWhere('(dislike.id IS NULL)')
       .andWhere('(like.id IS NULL)')
+      .andWhere('user.blockReason IS NULL')
+      .andWhere('blocksByMe.id IS NULL')
+      .andWhere('blockedByOthers.id IS NULL')
       .addOrderBy('user.lastLoginTimestamp', 'DESC')
       .addOrderBy('user.photoUrl', 'ASC');
 
@@ -994,6 +1035,18 @@ export class UserService {
     const baseQuery = this.userRepository
       .createQueryBuilder('user')
       .select(this.showedFeedParams)
+      .leftJoin(
+        UserBlock,
+        'blocksByMe',
+        '(blocksByMe.user_id = :userId AND blocksByMe.blockedUserId = user.userId)',
+        { userId },
+      )
+      .leftJoin(
+        UserBlock,
+        'blockedByOthers',
+        '(blockedByOthers.user_id = user.userId AND blockedByOthers.blockedUserId = :userId)',
+        { userId },
+      )
       .leftJoinAndSelect(
         Like,
         'likedMe',
@@ -1008,7 +1061,10 @@ export class UserService {
       )
       .where('user.userId != :userId')
       .andWhere('user.isBlocked = false')
+      .andWhere('user.blockReason IS NULL')
       .andWhere('user.isVisibleToOthers = true')
+      .andWhere('blocksByMe.id IS NULL')
+      .andWhere('blockedByOthers.id IS NULL')
       .andWhere('likedMe.id IS NOT NULL')
       .andWhere('iLiked.id IS NULL')
       .orderBy('likedMe.id', 'DESC');
@@ -1021,6 +1077,8 @@ export class UserService {
 
     // Получение общего количества пользователей, которые лайкнули текущего пользователя
     const total = await baseQuery.getCount();
+
+    console.log(users);
 
     // Возвращение пользователей вместе с пагинационной информацией
     return paginate<User>({
@@ -1174,5 +1232,128 @@ export class UserService {
       await this.userRepository.save(user);
       this.updateCache(user);
     }
+  }
+
+  async setBlockByUser(userId: string | number, blockedUserId: number) {
+    userId = `${userId}`;
+    // Находим пользователя, который хочет заблокировать другого пользователя
+    const user = await this.userRepository.findOne({ where: { userId } });
+    const partner = await this.userRepository.findOne({
+      where: { id: blockedUserId },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (!partner) {
+      throw new Error('Partner not found');
+    }
+
+    // Проверка, существует ли уже блокировка между этими двумя пользователями
+    const existingBlock = await this.blockRepository.findOne({
+      where: { user: { id: user.id }, blockedUserId: `${blockedUserId}` },
+    });
+
+    if (existingBlock) {
+      throw new Error('This user has already been blocked by the current user');
+    }
+
+    // Создание новой блокировки
+    const block = new UserBlock(user, `${partner.userId}`);
+    return await this.blockRepository.save(block);
+  }
+
+  async reportUser(
+    userId: string | number,
+    reportedUserId: number,
+    reason: ComplaintType,
+  ) {
+    userId = `${userId}`;
+    // Находим пользователя, который хочет заблокировать другого пользователя
+    const user = await this.userRepository.findOne({ where: { userId } });
+    const partner = await this.userRepository.findOne({
+      where: { id: reportedUserId },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (!partner) {
+      throw new Error('Partner not found');
+    }
+
+    // id для бана, это нужно будет переделывать потом, но пока так
+    if (
+      user.id === 719307698 ||
+      user.id === 6433634025 ||
+      user.id === 499387702
+    ) {
+      if (reason === ComplaintType.AGE_VIOLATION) {
+        await this.fileStoreService.deleteFromS3(partner.photoUrl);
+        await this.setPhoto(partner.userId, null);
+        await this.banUser(partner.userId, reason);
+      }
+
+      if (reason === ComplaintType.UNACCEPTABLE_CONTENT) {
+        await this.fileStoreService.deleteFromS3(partner.photoUrl);
+        await this.setPhoto(partner.userId, null);
+      }
+    }
+
+    await this.setBlockByUser(userId, reportedUserId);
+
+    const complaint = new UserComplaint(user, `${partner.userId}`, reason);
+    return await this.complaintRepository.save(complaint);
+  }
+
+  async removeMatch(userId: string | number, removedUserId: number) {
+    userId = `${userId}`;
+    // Находим пользователя, который хочет заблокировать другого пользователя
+    const user = await this.userRepository.findOne({ where: { userId } });
+    const partner = await this.userRepository.findOne({
+      where: { id: removedUserId },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (!partner) {
+      throw new Error('Partner not found');
+    }
+
+    await this.addDislike(user.userId, partner.userId);
+    return await this.addDislike(partner.userId, user.userId);
+  }
+
+  async unbanUser(userId: string | number): Promise<void> {
+    userId = `${userId}`;
+    const user = await this.userRepository.findOne({ where: { userId } });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found.`);
+    }
+
+    user.blockedUntil = null;
+    user.blockReason = null;
+
+    await this.userRepository.save(user);
+  }
+
+  async banUser(userId: string | number, reason: ComplaintType): Promise<void> {
+    userId = `${userId}`;
+    const user = await this.userRepository.findOne({ where: { userId } });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found.`);
+    }
+
+    user.blockedUntil = new Date();
+    user.blockReason = reason;
+
+    await this.userRepository.save(user);
+    this.updateCache(user);
   }
 }

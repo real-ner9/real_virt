@@ -13,8 +13,8 @@ import { Connection } from './schemas/connection.entity';
 import { ChatRequest } from './schemas/chat-request.entity';
 import { ProfileMatchModule } from '../profile-match/profile-match.module';
 import { FileStoreModule } from '../file-store/file-store.module';
-import { UserBlockEntity } from './schemas/user-block.entity';
-import { UserComplaintEntity } from './schemas/user-complaint.entity';
+import { UserBlock } from './schemas/user-block.entity';
+import { UserComplaint } from './schemas/user.complaint.entity';
 
 @Module({
   imports: [
@@ -26,8 +26,8 @@ import { UserComplaintEntity } from './schemas/user-complaint.entity';
       Match,
       Connection,
       ChatRequest,
-      UserBlockEntity,
-      UserComplaintEntity,
+      UserBlock,
+      UserComplaint,
     ]),
     ProfileMatchModule,
     FileStoreModule,
@@ -64,11 +64,11 @@ import { UserComplaintEntity } from './schemas/user-complaint.entity';
     },
     {
       provide: 'BLOCK_REPOSITORY',
-      useValue: UserBlockEntity,
+      useValue: UserBlock,
     },
     {
       provide: 'USER_COMPLAINT_REPOSITORY',
-      useValue: UserComplaintEntity,
+      useValue: UserComplaint,
     },
     UserActionsService,
     UsersWebSocketGateway,

@@ -8,7 +8,7 @@ import {
 import { User } from './user.entity';
 
 @Entity()
-export class UserBlockEntity {
+export class UserBlock {
   @PrimaryGeneratedColumn()
   id: number;
 

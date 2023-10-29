@@ -1,13 +1,16 @@
 import {
+  Body,
   Controller,
   Get,
   HttpException,
   HttpStatus,
+  Post,
   Query,
   Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { TgUser } from './types/tg-user';
+import { ComplaintType } from './schemas/user.complaint.entity';
 
 @Controller('user')
 export class UserController {
@@ -75,6 +78,49 @@ export class UserController {
         pageSize,
         pageNumber,
       );
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post('block')
+  async blockUser(
+    @Req() req: Request,
+    @Body('blockedUserId') blockedUserId: number,
+  ) {
+    try {
+      const authString = req.headers['authorization'];
+      const { id } = this.getUser(authString);
+      return await this.userService.setBlockByUser(id, blockedUserId);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post('complain')
+  async reportUser(
+    @Req() req: Request,
+    @Body('reportedUserId') reportedUserId: number,
+    @Body('reason') reason: ComplaintType,
+  ) {
+    try {
+      const authString = req.headers['authorization'];
+      const { id } = this.getUser(authString);
+      return await this.userService.reportUser(id, reportedUserId, reason);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post('removeMatch')
+  async removeMatch(
+    @Req() req: Request,
+    @Body('removedUserId') removedUserId: number,
+  ) {
+    try {
+      const authString = req.headers['authorization'];
+      const { id } = this.getUser(authString);
+      return await this.userService.removeMatch(id, removedUserId);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
