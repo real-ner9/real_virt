@@ -56,7 +56,7 @@ export class ChatActionsService {
     this.bot = bot;
 
     cron.schedule(
-      '0 0 20 * * *',
+      '0 0 16 * * *',
       async () => {
         const activeUsers = await this.userService.getAllActiveUsers();
         const blockedUsers: string[] = [];
@@ -73,7 +73,8 @@ export class ChatActionsService {
                   'За каждого приведенного пользователя твой шанс на выигрыш растет! 📈\n' +
                   'Бонус: анкеты участников конкурса получат приоритет в поиске у других пользователей! 🌟\n' +
                   'Не упусти свой шанс стать победителем! 🏆\n' +
-                  `Вот твоя уникальная ссылка https://t.me/gotovirtbot?start=${user.userId}`,
+                  `Вот твоя уникальная ссылка https://t.me/gotovirtbot?start=${user.userId}\n` +
+                  'Вводи /start, чтобы посмотреть сколько человек пришло по твоей ссылке ',
                 await this.getFindPartnerKeyboard(user.userId),
               )
               .then(async () => {
@@ -298,9 +299,13 @@ export class ChatActionsService {
     try {
       const userId = ctx.from.id.toString();
       await this.onEndChat(ctx, false);
+      const invitationCount = await this.userService.getInvitationCount(userId);
+
       await ctx
         .reply(
-          this.i18n.t('events.welcome', { lang: this.lang }),
+          `${this.i18n.t('events.welcome', {
+            lang: this.lang,
+          })}\n🎉 Поделись ссылкой на наше приложение. \n29 ноября один из участников получит 10 000 рублей! 💰\nКол-во переходов по твоей ссылке: ${invitationCount} \nВот твоя уникальная ссылка для конкурса https://t.me/gotovirtbot?start=${userId}`,
           await this.getFindPartnerKeyboard(userId),
         )
         .catch(async (err, ctx) => {

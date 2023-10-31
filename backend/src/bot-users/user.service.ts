@@ -1406,7 +1406,7 @@ export class UserService {
       return { message: 'Пользователь уже существует' };
     }
 
-    const existingInvite = this.invitationRepository.findOne({
+    const existingInvite = await this.invitationRepository.findOne({
       where: { invitedUserId: userId },
     });
 
@@ -1419,5 +1419,14 @@ export class UserService {
     await this.invitationRepository.save(newInvite);
 
     return { message: 'Инвайт добавлен' };
+  }
+
+  async getInvitationCount(userId: string): Promise<number> {
+    // Получаем количество приглашенных пользователей, где userId является пригласившим
+    const count = await this.invitationRepository.count({
+      where: { userId: userId },
+    });
+
+    return count;
   }
 }
