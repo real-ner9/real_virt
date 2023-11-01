@@ -144,7 +144,7 @@ export class User {
     this.name = null;
     this.username = null;
     this.showUsername = false;
-    this.lastLoginTimestamp = null;
+    this.lastLoginTimestamp = 0;
     this.blockedUntil = null;
     this.blockReason = null;
   }
