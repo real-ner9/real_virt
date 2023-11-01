@@ -1313,7 +1313,11 @@ export class UserService {
         await this.banUser(partner.userId, reason);
       }
 
-      if (reason === ComplaintType.UNACCEPTABLE_CONTENT && user.photoUrl) {
+      if (reason === ComplaintType.OFFENSIVE_BEHAVIOR && partner.description) {
+        await this.setDescription(partner.userId, null);
+      }
+
+      if (reason === ComplaintType.UNACCEPTABLE_CONTENT && partner.photoUrl) {
         await this.fileStoreService.deleteFromS3(partner.photoUrl);
         await this.setPhoto(partner.userId, null);
       }
