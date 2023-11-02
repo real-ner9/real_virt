@@ -1314,7 +1314,7 @@ export class UserService {
       }
 
       if (reason === ComplaintType.OFFENSIVE_BEHAVIOR && partner.description) {
-        await this.setDescription(partner.userId, null);
+        await this.setDescription(partner.userId, ' ');
       }
 
       if (reason === ComplaintType.UNACCEPTABLE_CONTENT && partner.photoUrl) {
