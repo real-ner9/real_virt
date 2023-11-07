@@ -27,6 +27,7 @@ export class UserService {
     'user.id',
     'user.currentPartner',
     'user.dateOfBirth',
+    'user.age',
     'user.online',
     'user.name',
     'user.role',
