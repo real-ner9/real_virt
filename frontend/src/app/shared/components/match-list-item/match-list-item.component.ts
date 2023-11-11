@@ -1,17 +1,17 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { User } from '../../shared/models/user';
-import { UserRoleMap } from '../../shared/models/user-role';
-import { ComplaintType, ComplaintTypeMap } from '../../shared/models/complaint';
-import { UserFacade } from '../../shared/store/user.facade';
+import { User } from '../../models/user';
+import { UserRoleMap } from '../../models/user-role';
+import { ComplaintType, ComplaintTypeMap } from '../../models/complaint';
+import { UserFacade } from '../../store/user.facade';
 
 type EnhancedUser = User & { chatRequested?: boolean };
 
 @Component({
-  selector: 'app-list-item',
-  templateUrl: './list-item.component.html',
-  styleUrls: ['./list-item.component.scss']
+  selector: 'app-match-list-item',
+  templateUrl: './match-list-item.component.html',
+  styleUrls: ['./match-list-item.component.scss']
 })
-export class ListItemComponent {
+export class MatchListItemComponent {
   @Input() page: 'requests' | 'matches' = 'requests';
   @Input() value?: EnhancedUser;
 

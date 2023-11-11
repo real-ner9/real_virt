@@ -1,10 +1,10 @@
 <div class="items">
-  <app-list-item
+  <app-match-list-item
     page="requests"
     *ngFor="let item of (requests$ | async)"
     [value]="item"
     (approve)="onApprove($event)"
     (cancel)="onCancel($event)">
-  </app-list-item>
+  </app-match-list-item>
 </div>
 <app-background-for-switcher></app-background-for-switcher>

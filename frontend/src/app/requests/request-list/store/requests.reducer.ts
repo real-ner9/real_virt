@@ -7,7 +7,7 @@ import {
   cancelRequest, approveRequest, requestApproved, requestCanceled, approveRequestSuccess, clearRequests,
 } from './requests.actions';
 import { User } from '../../../shared/models/user';
-import { matchRequestCanceled, matchRequested } from '../../match-list/store/matches.actions';
+import { matchRequestCanceled, matchRequested } from '../../../profile-match/match-list/store/matches.actions';
 import { blockUserSuccess, removeMatchSuccess, reportUserSuccess } from '../../../shared/store/user.actions';
 
 export interface RequestsState {

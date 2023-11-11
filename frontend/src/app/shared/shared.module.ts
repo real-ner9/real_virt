@@ -16,6 +16,7 @@ import { AgePipe } from './pipes/age.pipe';
 import { FeedListItemComponent } from './components/feed-list-item/feed-list-item.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatchListItemComponent } from './components/match-list-item/match-list-item.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { MatChipsModule } from '@angular/material/chips';
     ButtonComponent,
     AgePipe,
     FeedListItemComponent,
+    MatchListItemComponent,
   ],
   exports: [
     MainTabSwitcherComponent,
@@ -34,6 +36,7 @@ import { MatChipsModule } from '@angular/material/chips';
     PhotoUrlPipe,
     AgePipe,
     FeedListItemComponent,
+    MatchListItemComponent,
   ],
   imports: [
     MatTabsModule,

@@ -69,8 +69,8 @@ export class ProfileMatchActionsService {
         ? [
             [
               Markup.button.webApp(
-                'Перейти в чат',
-                `${process.env.WEB_APP_URL}/matches/requests`,
+                'Смотреть мэтчи',
+                `${process.env.WEB_APP_URL}/matches`,
               ),
             ],
           ]
@@ -78,7 +78,7 @@ export class ProfileMatchActionsService {
             [
               Markup.button.webApp(
                 'Смотреть лайки',
-                `${process.env.WEB_APP_URL}/feed/likes`,
+                `${process.env.WEB_APP_URL}/likes`,
               ),
             ],
           ];
@@ -104,13 +104,13 @@ export class ProfileMatchActionsService {
         [
           Markup.button.webApp(
             'Перейти в чат',
-            `${process.env.WEB_APP_URL}/matches/requests`,
+            `${process.env.WEB_APP_URL}/requests`,
           ),
         ],
         [
           Markup.button.webApp(
             'Заблокировать',
-            `${process.env.WEB_APP_URL}/matches/requests`,
+            `${process.env.WEB_APP_URL}/requests`,
           ),
         ],
       ];
@@ -167,14 +167,27 @@ export class ProfileMatchActionsService {
     }
   }
 
+  getYearsCount(dateOfBirth: Date | string): number | undefined {
+    if (!dateOfBirth) return undefined;
+
+    const birthdate = new Date(dateOfBirth);
+    if (isNaN(birthdate.getTime())) {
+      return undefined;
+    }
+    const timeDiff = Math.abs(Date.now() - birthdate.getTime());
+    const age = Math.floor(timeDiff / (1000 * 3600 * 24) / 365.25); // Учитывает високосные годы
+
+    return age;
+  }
+
   getCaptionText(user, showUsername = false): string {
     return `${
       showUsername && user.username
         ? `<a href="https://t.me/${user.username}">${user.name}</a>`
         : user.name || ''
-    }\n${user.age || ''}\n${UserRoleMap[user.role] || ''}\n${
-      user.description || ''
-    }`;
+    }\n${this.getYearsCount(user.dateOfBirth) || user.age || ''}\n${
+      UserRoleMap[user.role] || ''
+    }\n${user.description || ''}`;
   }
 
   getUserId(ctx): string {

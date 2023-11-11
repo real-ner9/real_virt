@@ -145,7 +145,7 @@ export class AppComponent implements OnDestroy {
           .onAction()
           .pipe(takeUntil(this.destroy$))
           .subscribe(() => {
-            this.router.navigate([hasPartnerLikedUser ? '/matches/list' : '/feed/likes']);
+            this.router.navigate([hasPartnerLikedUser ? '/matches' : '/likes']);
           });
       })
 
@@ -164,7 +164,7 @@ export class AppComponent implements OnDestroy {
           .onAction()
           .pipe(takeUntil(this.destroy$))
           .subscribe(() => {
-            this.router.navigate(['/matches/requests']);
+            this.router.navigate(['/requests']);
           });
       })
   }
