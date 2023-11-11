@@ -18,17 +18,31 @@ export class MainTabSwitcherComponent {
         icon: 'matches',
       },
       {
+        label: 'Приглашения',
+        labelKey: 'requests',
+        link: '/requests',
+        index: 1,
+        icon: 'requests',
+      },
+      {
         label: 'Лента',
         labelKey: 'feed',
         link: '/feed',
-        index: 1,
+        index: 2,
         icon: 'feed',
+      },
+      {
+        label: 'Лайки',
+        labelKey: 'likes',
+        link: '/likes',
+        index: 3,
+        icon: 'likes',
       },
       {
         label: 'Профиль',
         labelKey: 'settings',
         link: '/settings',
-        index: 1,
+        index: 4,
         icon: 'settings',
       },
     ];

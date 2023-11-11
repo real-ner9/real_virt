@@ -13,6 +13,9 @@ import { userReducer } from './store/user.reducer';
 import { ButtonComponent } from './components/button/button.component';
 import { MatButtonModule } from '@angular/material/button';
 import { AgePipe } from './pipes/age.pipe';
+import { FeedListItemComponent } from './components/feed-list-item/feed-list-item.component';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatChipsModule } from '@angular/material/chips';
 
 @NgModule({
   declarations: [
@@ -22,6 +25,7 @@ import { AgePipe } from './pipes/age.pipe';
     PhotoUrlPipe,
     ButtonComponent,
     AgePipe,
+    FeedListItemComponent,
   ],
   exports: [
     MainTabSwitcherComponent,
@@ -29,6 +33,7 @@ import { AgePipe } from './pipes/age.pipe';
     IconComponent,
     PhotoUrlPipe,
     AgePipe,
+    FeedListItemComponent,
   ],
   imports: [
     MatTabsModule,
@@ -39,6 +44,8 @@ import { AgePipe } from './pipes/age.pipe';
     StoreModule.forFeature('user', userReducer),
     EffectsModule.forFeature([UserEffects]),
     MatButtonModule,
+    MatMenuModule,
+    MatChipsModule,
   ]
 })
 export class SharedModule { }

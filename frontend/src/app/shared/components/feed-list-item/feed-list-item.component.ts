@@ -1,16 +1,16 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { User } from '../../shared/models/user';
-import { UserRoleMap } from '../../shared/models/user-role';
-import { ComplaintTypeMap, ComplaintType } from '../../shared/models/complaint';
-import { UserFacade } from '../../shared/store/user.facade';
+import { User } from '../../models/user';
+import { UserRoleMap } from '../../models/user-role';
+import { ComplaintTypeMap, ComplaintType } from '../../models/complaint';
+import { UserFacade } from '../../store/user.facade';
 
 
 @Component({
   selector: 'app-feed-list-item',
-  templateUrl: './list-item.component.html',
-  styleUrls: ['./list-item.component.scss']
+  templateUrl: './feed-list-item.component.html',
+  styleUrls: ['./feed-list-item.component.scss']
 })
-export class ListItemComponent {
+export class FeedListItemComponent {
   @Input() page: 'feed' | 'likes' = 'feed';
   @Input() value?: User;
 

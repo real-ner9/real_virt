@@ -6,7 +6,7 @@ import { debounceTime, of } from 'rxjs';
 import * as matchesActions from './matches.actions';
 import { UserService } from '../../../shared/services/user.service';
 import { SocketService } from '../../../shared/services/user-socket.service';
-import * as LikesActions from '../../../feed/like-list/store/likes.actions';
+import * as LikesActions from '../../../likes/like-list/store/likes.actions';
 
 @Injectable()
 export class MatchesEffects {
