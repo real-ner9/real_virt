@@ -156,39 +156,46 @@ export class FileStoreService {
         },
       });
 
-      // Собираем ключи для удаления из S3
-      const keysToDelete = unusedImages.map((image) => ({
-        Key: image.fileHash,
-      }));
-
-      if (keysToDelete.length > 0) {
-        // Удаляем найденные картинки из S3
-        const deleteParams = {
-          Bucket: process.env.S3_BUCKET,
-          Delete: {
-            Objects: keysToDelete,
-            Quiet: false,
-          },
-        };
-        const res = await this.s3.deleteObjects(deleteParams);
-        this.logger.log(
-          `Files deleted successfully from S3. ${res.Deleted.length} items removed.`,
-        );
-
-        if (res.Errors && res.Errors.length > 0) {
-          this.logger.error(
-            `Some objects could not be deleted from S3:`,
-            res.Errors,
-          );
-        }
-
-        // Удаляем найденные картинки из базы данных
-        for (const image of unusedImages) {
-          await this.fileStoreRepository.remove(image);
-        }
-      } else {
-        this.logger.log(`No unused images with status INITIAL to remove.`);
+      for (const key of unusedImages) {
+        await this.deleteFromS3(key.fileHash);
       }
+      // TODO Нужно разобраться как удалять пачками
+      // // Собираем ключи для удаления из S3
+      // const keysToDelete = unusedImages.map((image) => ({
+      //   Key: image.fileHash,
+      // }));
+
+      // if (keysToDelete.length > 0) {
+      //   // Удаляем найденные картинки из S3
+      //   const deleteParams: DeleteObjectsCommandInput = {
+      //     Bucket: process.env.S3_BUCKET,
+      //     Delete: {
+      //       Objects: keysToDelete,
+      //       Quiet: false,
+      //     },
+      //   };
+      //
+      //   console.log(deleteParams.Delete.Objects);
+      //   // const deleteObjectsCommand = new DeleteObjectsCommandIn(deleteParams);
+      //   const res = await this.s3.deleteObjects(deleteParams);
+      //   this.logger.log(
+      //     `Files deleted successfully from S3. ${res.Deleted.length} items removed.`,
+      //   );
+      //
+      //   if (res.Errors && res.Errors.length > 0) {
+      //     this.logger.error(
+      //       `Some objects could not be deleted from S3:`,
+      //       res.Errors,
+      //     );
+      //   }
+      //
+      //   // Удаляем найденные картинки из базы данных
+      //   for (const image of unusedImages) {
+      //     await this.fileStoreRepository.remove(image);
+      //   }
+      // } else {
+      //   this.logger.log(`No unused images with status INITIAL to remove.`);
+      // }
     } catch (error) {
       this.logger.error(`Error removing unused images. ${error}`);
       throw error;
