@@ -68,13 +68,7 @@ export class ChatActionsService {
             await this.bot.telegram
               .sendMessage(
                 user.userId,
-                '🎉 Сейчас у нас проходит конкурс! 🎉\n' +
-                  'Поделись ссылкой на наше приложение и приведи новых друзей. \n29 ноября один из участников получит 10 000 рублей! 💰\n' +
-                  'За каждого приведенного пользователя твой шанс на выигрыш растет! 📈\n' +
-                  'Бонус: анкеты участников конкурса получат приоритет в поиске у других пользователей! 🌟\n' +
-                  'Не упусти свой шанс стать победителем! 🏆\n' +
-                  `Вот твоя уникальная ссылка https://t.me/gotovirtbot?start=${user.userId}\n` +
-                  'Вводи /start, чтобы посмотреть сколько человек пришло по твоей ссылке ',
+                '🌆 Вечер наступил, и мы так заждались тебя! Самое время завести интересный разговор в нашем чате. 🥳🌟',
                 await this.getFindPartnerKeyboard(user.userId),
               )
               .then(async () => {
@@ -299,25 +293,14 @@ export class ChatActionsService {
     try {
       const userId = ctx.from.id.toString();
       await this.onEndChat(ctx, false);
-      const invitationCount = await this.userService.getInvitationCount(userId);
-
       await ctx
         .reply(
-          `${this.i18n.t('events.welcome', {
-            lang: this.lang,
-          })}\n🎉 Поделись ссылкой на наше приложение. \n29 ноября один из участников получит 10 000 рублей! 💰\nКол-во переходов по твоей ссылке: ${invitationCount} \nВот твоя уникальная ссылка для конкурса https://t.me/gotovirtbot?start=${userId}`,
+          this.i18n.t('events.welcome', { lang: this.lang }),
           await this.getFindPartnerKeyboard(userId),
         )
         .catch(async (err, ctx) => {
           await this.handleBotEventError('events.welcome: ', err, ctx);
         });
-
-      const messageText = ctx.message.text;
-      if (messageText.includes('/start')) {
-        const inviterId = messageText.split('/start')[1]?.trim() || null;
-
-        await this.userService.addInvitation(userId, inviterId);
-      }
     } catch (e) {
       console.error('onBotStart error', e.message);
     }
